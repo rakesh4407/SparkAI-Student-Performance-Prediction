@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SparkAI • Prediction History Analytics</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+              },
+              performance: {
+                excellent: "#10b981",
+                good: "#3b82f6",
+                average: "#f59e0b",
+                poor: "#ef4444",
+              },
+            },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease-out",
+              "slide-up": "slideUp 0.4s ease-out",
+            },
+            keyframes: {
+              fadeIn: {
+                from: { opacity: 0 },
+                to: { opacity: 1 },
+              },
+              slideUp: {
+                from: { transform: "translateY(10px)", opacity: 0 },
+                to: { transform: "translateY(0)", opacity: 1 },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/a2e0e6ad65.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+      /* Smooth transitions */
+      .smooth-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Glass effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Custom scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+  </head>
+
+  <body
+    class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-sky-50 text-slate-800"
+  >
+    <!-- Header -->
+    <header class="sticky top-0 z-50 glass border-b border-slate-200/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-3">
+            <a
+              href="/teacher-dashboard"
+              class="flex items-center space-x-3 group"
+            >
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center group-hover:scale-110 smooth-transition"
+              >
+                <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+              </div>
+              <div>
+                <span class="font-bold text-lg text-slate-900">SparkAI</span>
+                <div class="text-xs text-primary-600 font-medium">
+                  Teacher Dashboard
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Navigation -->
+          <nav
+            class="hidden md:flex items-center space-x-6 text-sm font-medium"
+          >
+            <a
+              href="/teacher-dashboard"
+              class="text-slate-700 hover:text-primary-600 smooth-transition"
+            >
+              <i class="fa-solid fa-chart-line mr-1"></i>Dashboard
+            </a>
+            <a
+              href="/prediction-history"
+              class="text-primary-600 font-semibold smooth-transition"
+            >
+              <i class="fa-solid fa-history mr-1"></i>History
+            </a>
+            <a
+              href="/chatbot"
+              class="text-slate-700 hover:text-primary-600 smooth-transition"
+            >
+              <i class="fa-solid fa-robot mr-1"></i>AI Chatbot
+            </a>
+            <a
+              href="/logout"
+              class="text-red-600 hover:text-red-800 smooth-transition"
+            >
+              <i class="fa-solid fa-right-from-bracket mr-1"></i>Logout
+            </a>
+          </nav>
+
+          <!-- Mobile menu button -->
+          <button
+            id="mobile-menu-button"
+            class="md:hidden p-2 rounded-lg hover:bg-slate-100"
+          >
+            <i class="fa-solid fa-bars text-lg text-slate-700"></i>
+          </button>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div
+          id="mobile-menu"
+          class="hidden md:hidden mt-4 pb-4 border-t border-slate-200 pt-4"
+        >
+          <div class="flex flex-col space-y-3">
+            <a
+              href="/teacher-dashboard"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+            >
+              <i class="fa-solid fa-chart-line mr-2"></i>Dashboard
+            </a>
+            <a
+              href="/prediction-history"
+              class="text-primary-600 font-semibold py-2 smooth-transition"
+            >
+              <i class="fa-solid fa-history mr-2"></i>History
+            </a>
+            <a
+              href="/chatbot"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+            >
+              <i class="fa-solid fa-robot mr-2"></i>AI Chatbot
+            </a>
+            <a
+              href="/logout"
+              class="text-red-600 hover:text-red-800 font-medium py-2 smooth-transition"
+            >
+              <i class="fa-solid fa-right-from-bracket mr-2"></i>Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+      <!-- Page Header -->
+      <div class="mb-8 animate-fade-in">
+        <div
+          class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
+        >
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+              Prediction History Analytics
+            </h1>
+            <p class="text-slate-600">
+              Track and analyze all AI performance predictions
+            </p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              onclick="exportHistory()"
+              class="px-4 py-2 rounded-xl bg-green-50 border border-green-200 text-green-700 hover:bg-green-100 smooth-transition text-sm font-medium"
+            >
+              <i class="fa-solid fa-file-export mr-2"></i>Export CSV
+            </button>
+            <button
+              onclick="refreshPage()"
+              class="px-4 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 hover:bg-blue-100 smooth-transition text-sm font-medium"
+            >
+              <i class="fa-solid fa-rotate-right mr-2"></i>Refresh
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+          <div class="glass rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500">Total Predictions</p>
+                <p class="text-2xl font-bold text-slate-900 mt-1">
+                  {{ history|length if history else 0 }}
+                </p>
+              </div>
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-brain text-blue-600 text-lg"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500">Today's Predictions</p>
+                <p
+                  class="text-2xl font-bold text-slate-900 mt-1"
+                  id="today-count"
+                >
+                  0
+                </p>
+              </div>
+              <div
+                class="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-calendar-day text-green-600 text-lg"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500">Avg Input Score</p>
+                <p
+                  class="text-2xl font-bold text-slate-900 mt-1"
+                  id="avg-input"
+                >
+                  0
+                </p>
+                <p class="text-xs text-slate-400">/60 marks</p>
+              </div>
+              <div
+                class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center"
+              >
+                <i
+                  class="fa-solid fa-pen-to-square text-purple-600 text-lg"
+                ></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500">Avg End-term</p>
+                <p
+                  class="text-2xl font-bold text-slate-900 mt-1"
+                  id="avg-endterm"
+                >
+                  0
+                </p>
+                <p class="text-xs text-slate-400">/40 marks</p>
+              </div>
+              <div
+                class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center"
+              >
+                <i
+                  class="fa-solid fa-graduation-cap text-emerald-600 text-lg"
+                ></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500">At-Risk Students</p>
+                <p
+                  class="text-2xl font-bold text-slate-900 mt-1"
+                  id="at-risk-count"
+                >
+                  0
+                </p>
+              </div>
+              <div
+                class="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center"
+              >
+                <i
+                  class="fa-solid fa-exclamation-triangle text-red-600 text-lg"
+                ></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters and Charts Section -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Filters Card -->
+        <div class="lg:col-span-1">
+          <div class="glass rounded-2xl shadow-sm p-6 animate-slide-up">
+            <h3
+              class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-filter text-primary-600"></i>
+              Filter Predictions
+            </h3>
+
+            <form method="GET" action="/prediction-history" class="space-y-4">
+              <!-- Search -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i
+                    class="fa-solid fa-magnifying-glass mr-1 text-slate-500"
+                  ></i>
+                  Search
+                </label>
+                <input
+                  type="text"
+                  name="search"
+                  value="{{ search if search else '' }}"
+                  placeholder="Name, roll number..."
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                />
+              </div>
+
+              <!-- Performance Filter -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fa-solid fa-tag mr-1 text-slate-500"></i>
+                  Performance Category
+                </label>
+                <select
+                  name="label"
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                >
+                  <option value="" {% if not label %}selected{% endif %}>
+                    All Categories
+                  </option>
+                  <option
+                    value="Excellent"
+                    {%
+                    if
+                    label=""
+                    ="Excellent"
+                    %}selected{%
+                    endif
+                    %}
+                  >
+                    Excellent
+                  </option>
+                  <option
+                    value="Good"
+                    {%
+                    if
+                    label=""
+                    ="Good"
+                    %}selected{%
+                    endif
+                    %}
+                  >
+                    Good
+                  </option>
+                  <option
+                    value="Average"
+                    {%
+                    if
+                    label=""
+                    ="Average"
+                    %}selected{%
+                    endif
+                    %}
+                  >
+                    Average
+                  </option>
+                  <option
+                    value="Poor"
+                    {%
+                    if
+                    label=""
+                    ="Poor"
+                    %}selected{%
+                    endif
+                    %}
+                  >
+                    Needs Improvement
+                  </option>
+                </select>
+              </div>
+
+              <!-- Date Range -->
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2"
+                    >From Date</label
+                  >
+                  <input
+                    type="date"
+                    name="date_from"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-2"
+                    >To Date</label
+                  >
+                  <input
+                    type="date"
+                    name="date_to"
+                    class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                  />
+                </div>
+              </div>
+
+              <!-- Sort -->
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">
+                  <i class="fa-solid fa-sort mr-1 text-slate-500"></i>
+                  Sort By
+                </label>
+                <select
+                  name="sort"
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                >
+                  <option
+                    value="date_desc"
+                    {%
+                    if
+                    sort=""
+                    ="date_desc"
+                    or
+                    not
+                    sort
+                    %}selected{%
+                    endif
+                    %}
+                  >
+                    Latest First
+                  </option>
+                  <option
+                    value="date_asc"
+                    {%
+                    if
+                    sort=""
+                    ="date_asc"
+                    %}selected{%
+                    endif
+                    %}
+                  >
+                    Oldest First
+                  </option>
+                </select>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="pt-2 flex gap-3">
+                <button
+                  type="submit"
+                  class="flex-1 px-4 py-2.5 rounded-xl bg-primary-600 text-white font-medium hover:bg-primary-700 smooth-transition flex items-center justify-center gap-2"
+                >
+                  <i class="fa-solid fa-filter"></i>
+                  Apply Filters
+                </button>
+                <button
+                  type="button"
+                  onclick="clearFilters()"
+                  class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 smooth-transition"
+                >
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="lg:col-span-2">
+          <div
+            class="glass rounded-2xl shadow-sm p-6 animate-slide-up"
+            style="animation-delay: 0.1s"
+          >
+            <div class="flex items-center justify-between mb-6">
+              <h3
+                class="text-lg font-bold text-slate-900 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-chart-pie text-primary-600"></i>
+                Performance Distribution
+              </h3>
+              <div class="text-sm text-slate-500">
+                Based on {{ history|length if history else 0 }} predictions
+              </div>
+            </div>
+
+            <div class="h-64">
+              <canvas id="performanceChart"></canvas>
+            </div>
+
+            <!-- Chart Legend -->
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="flex items-center gap-2 p-3 rounded-xl bg-green-50">
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <div>
+                  <div class="font-medium text-green-800">Excellent</div>
+                  <div class="text-xs text-green-600" id="excellent-count">
+                    0
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 p-3 rounded-xl bg-blue-50">
+                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                <div>
+                  <div class="font-medium text-blue-800">Good</div>
+                  <div class="text-xs text-blue-600" id="good-count">0</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 p-3 rounded-xl bg-amber-50">
+                <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                <div>
+                  <div class="font-medium text-amber-800">Average</div>
+                  <div class="text-xs text-amber-600" id="average-count">0</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 p-3 rounded-xl bg-red-50">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div>
+                  <div class="font-medium text-red-800">Needs Improvement</div>
+                  <div class="text-xs text-red-600" id="poor-count">0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- History Table -->
+      <div
+        class="glass rounded-2xl shadow-sm overflow-hidden animate-slide-up"
+        style="animation-delay: 0.2s"
+      >
+        <!-- Table Header -->
+        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+          <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <h3 class="text-lg font-bold text-slate-900">Prediction Records</h3>
+            <div class="flex items-center gap-3 text-sm">
+              <span class="text-slate-600" id="showing-count"
+                >Showing {{ history|length if history else 0 }} records</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Content -->
+        <div class="overflow-x-auto custom-scrollbar">
+          {% if history and history|length > 0 %}
+          <table class="w-full">
+            <thead class="bg-slate-50">
+              <tr>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  Student
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  A(10)
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  M(20)
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  I(30)
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  End-term(40)
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  Total(100)
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  Category
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  Date
+                </th>
+                <th
+                  class="py-3 px-4 text-left text-xs font-semibold text-slate-700 uppercase"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              {% for h in history %}
+              <tr class="hover:bg-slate-50/50 smooth-transition">
+                <td class="py-4 px-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-medium"
+                    >
+                      {{ h.name[0]|upper if h.name else '?' }}
+                    </div>
+                    <div>
+                      <div class="font-medium text-slate-900">
+                        {{ h.name if h.name else 'Unknown' }}
+                      </div>
+                      {% if h.roll_no and h.roll_no != 'None' %}
+                      <div class="text-xs text-slate-400">
+                        Roll: {{ h.roll_no }}
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <span class="font-medium text-green-600"
+                    >{{ h.assignments_score|default('--') }}</span
+                  >
+                </td>
+                <td class="py-4 px-4">
+                  <span class="font-medium text-amber-600"
+                    >{{ h.midterm_score|default('--') }}</span
+                  >
+                </td>
+                <td class="py-4 px-4">
+                  <span class="font-medium text-purple-600"
+                    >{{ h.internal_score|default('--') }}</span
+                  >
+                </td>
+                <td class="py-4 px-4">
+                  <span class="font-medium text-blue-600"
+                    >{{ h.predicted_endterm|default('--') }}</span
+                  >
+                </td>
+                <td class="py-4 px-4">
+                  <span class="font-bold text-slate-900"
+                    >{{ h.total_score|default('--') }}</span
+                  >
+                </td>
+                <td class="py-4 px-4">
+                  {% if h.predicted_label == 'Excellent' %}
+                  <span
+                    class="px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold"
+                    >Excellent</span
+                  >
+                  {% elif h.predicted_label == 'Good' %}
+                  <span
+                    class="px-3 py-1 rounded-full bg-blue-100 text-blue-800 text-xs font-semibold"
+                    >Good</span
+                  >
+                  {% elif h.predicted_label == 'Average' %}
+                  <span
+                    class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold"
+                    >Average</span
+                  >
+                  {% else %}
+                  <span
+                    class="px-3 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold"
+                    >Needs Improvement</span
+                  >
+                  {% endif %}
+                </td>
+                <td class="py-4 px-4 text-sm text-slate-600">
+                  {% if h.date_time %} {{ h.date_time.split(' ')[0] if
+                  h.date_time else '-' }} {% else %} - {% endif %}
+                </td>
+                <td class="py-4 px-4">
+                  <div class="flex items-center gap-2">
+                    <button
+                      onclick="viewDetails({{ h.id }})"
+                      class="p-2 rounded-lg hover:bg-slate-100 smooth-transition text-slate-600"
+                      title="View Details"
+                    >
+                      <i class="fa-solid fa-eye text-sm"></i>
+                    </button>
+                    {% if h.roll_no and h.roll_no != 'None' %}
+                    <a
+                      href="/student-report/{{ h.roll_no }}"
+                      class="p-2 rounded-lg hover:bg-blue-100 smooth-transition text-blue-600"
+                      title="Download Report"
+                    >
+                      <i class="fa-solid fa-download text-sm"></i>
+                    </a>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <!-- Empty State -->
+          <div class="py-16 text-center">
+            <div class="w-20 h-20 mx-auto mb-6 text-slate-300">
+              <i class="fa-solid fa-history text-5xl"></i>
+            </div>
+            <h4 class="text-xl font-semibold text-slate-600 mb-2">
+              No Prediction Records Found
+            </h4>
+            <p class="text-slate-500 mb-6 max-w-md mx-auto">
+              {% if search or label %} No records match your current filters.
+              Try adjusting your search criteria. {% else %} No prediction
+              history available yet. Start by making some predictions from the
+              dashboard. {% endif %}
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+              <a
+                href="/teacher-dashboard"
+                class="px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 smooth-transition font-medium"
+              >
+                <i class="fa-solid fa-chart-line mr-2"></i>Go to Dashboard
+              </a>
+              {% if search or label %}
+              <button
+                onclick="clearFilters()"
+                class="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 smooth-transition font-medium"
+              >
+                <i class="fa-solid fa-times mr-2"></i>Clear Filters
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Table Footer -->
+        {% if history and history|length > 0 %}
+        <div
+          class="px-6 py-4 border-t border-slate-200 bg-slate-50 text-sm text-slate-600"
+        >
+          <div
+            class="flex flex-col md:flex-row md:items-center justify-between gap-4"
+          >
+            <div>
+              Showing <span class="font-medium">{{ history|length }}</span> of
+              <span class="font-medium" id="total-records"
+                >{{ history|length }}</span
+              >
+              predictions
+            </div>
+            <div class="flex items-center gap-4">
+              <button
+                onclick="exportHistory()"
+                class="text-primary-600 hover:text-primary-800 font-medium smooth-transition flex items-center gap-2"
+              >
+                <i class="fa-solid fa-file-csv"></i>Export as CSV
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Back Link -->
+      <div class="mt-8">
+        <a
+          href="/teacher-dashboard"
+          class="inline-flex items-center gap-2 text-primary-600 hover:text-primary-800 font-medium smooth-transition"
+        >
+          <i class="fa-solid fa-arrow-left"></i>Back to Teacher Dashboard
+        </a>
+      </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+      // Mobile menu toggle
+      document.getElementById('mobile-menu-button').addEventListener('click', function() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+      });
+
+      // Calculate statistics
+      function calculateStats() {
+        const history = {{ history|tojson|safe if history else '[]' }};
+
+        if (history.length === 0) return;
+
+        // Today's count
+        const today = new Date().toISOString().split('T')[0];
+        const todayCount = history.filter(h => h.date_time && h.date_time.startsWith(today)).length;
+        document.getElementById('today-count').textContent = todayCount;
+
+        // Calculate averages
+        let totalInput = 0;
+        let totalEndterm = 0;
+        let excellentCount = 0, goodCount = 0, averageCount = 0, poorCount = 0;
+
+        history.forEach(h => {
+          const assignments = h.assignments_score || 0;
+          const midterm = h.midterm_score || 0;
+          const internal_score = h.internal_score || 0;
+          const endterm = h.predicted_endterm || 0;
+
+          totalInput += assignments + midterm + internal_score;
+          totalEndterm += endterm;
+
+          const total = (assignments + midterm + internal_score + endterm) || 0;
+          if (total >= 80) excellentCount++;
+          else if (total >= 70) goodCount++;
+          else if (total >= 60) averageCount++;
+          else if (total > 0) poorCount++;
+        });
+
+        document.getElementById('avg-input').textContent = (totalInput / history.length).toFixed(1);
+        document.getElementById('avg-endterm').textContent = (totalEndterm / history.length).toFixed(1);
+        document.getElementById('excellent-count').textContent = excellentCount;
+        document.getElementById('good-count').textContent = goodCount;
+        document.getElementById('average-count').textContent = averageCount;
+        document.getElementById('poor-count').textContent = poorCount;
+        document.getElementById('at-risk-count').textContent = poorCount;
+
+        document.getElementById('showing-count').textContent = `Showing ${history.length} records`;
+        document.getElementById('total-records').textContent = history.length;
+
+        initChart(excellentCount, goodCount, averageCount, poorCount);
+      }
+
+      function initChart(excellent, good, average, poor) {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        if (window.performanceChart) window.performanceChart.destroy();
+
+        window.performanceChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Excellent', 'Good', 'Average', 'Needs Improvement'],
+            datasets: [{
+              data: [excellent, good, average, poor],
+              backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            cutout: '65%'
+          }
+        });
+      }
+
+      function exportHistory() {
+        const history = {{ history|tojson|safe if history else '[]' }};
+        if (history.length === 0) return showNotification('No data to export', 'warning');
+
+        const headers = ['ID', 'Roll No', 'Student Name', 'Assignments', 'Midterm', 'Internal Score', 'Predicted End-term', 'Total', 'Category', 'Date'];
+        const csv = [
+          headers.join(','),
+          ...history.map(h => [
+            h.id,
+            h.roll_no || '',
+            `"${(h.name || '').replace(/"/g, '""')}"`,
+            h.assignments_score || '',
+            h.midterm_score || '',
+            h.internal_score || '',
+            h.predicted_endterm || '',
+            h.total_score || '',
+            h.predicted_label || '',
+            h.date_time || ''
+          ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `predictions-${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        showNotification(`Exported ${history.length} records`, 'success');
+      }
+
+      function clearFilters() { window.location.href = '/prediction-history'; }
+      function refreshPage() { window.location.reload(); }
+      function viewDetails(id) { showNotification(`Viewing details for prediction #${id}`, 'info'); }
+
+      function showNotification(message, type = 'info') {
+        const existing = document.querySelector('.notification-toast');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = `notification-toast fixed top-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg animate-slide-up ${
+          type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
+          type === 'error' ? 'bg-red-100 text-red-800 border border-red-200' :
+          type === 'warning' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+          'bg-blue-100 text-blue-800 border border-blue-200'
+        }`;
+        notification.innerHTML = `<div class="flex items-center gap-3"><i class="fa-solid fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i><span>${message}</span></div>`;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+      }
+
+      document.addEventListener('DOMContentLoaded', calculateStats);
+    </script>
+  </body>
+</html>

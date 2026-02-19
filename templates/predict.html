@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SparkAI • AI Performance Predictor</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+              },
+              performance: {
+                excellent: "#10b981",
+                good: "#3b82f6",
+                average: "#f59e0b",
+                poor: "#ef4444",
+              },
+            },
+            animation: {
+              float: "float 6s ease-in-out infinite",
+              "fade-in": "fadeIn 0.8s ease-out",
+              "slide-up": "slideUp 0.5s ease-out",
+              "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+            },
+            keyframes: {
+              float: {
+                "0%, 100%": { transform: "translateY(0px)" },
+                "50%": { transform: "translateY(-10px)" },
+              },
+              fadeIn: {
+                from: { opacity: 0 },
+                to: { opacity: 1 },
+              },
+              slideUp: {
+                from: { transform: "translateY(10px)", opacity: 0 },
+                to: { transform: "translateY(0)", opacity: 1 },
+              },
+              pulseGlow: {
+                "0%, 100%": { boxShadow: "0 0 20px rgba(59, 130, 246, 0.3)" },
+                "50%": { boxShadow: "0 0 30px rgba(59, 130, 246, 0.5)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/a2e0e6ad65.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Glass effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Smooth transitions */
+      .smooth-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Score indicators */
+      .score-indicator {
+        position: relative;
+        height: 6px;
+        border-radius: 3px;
+        background: #e5e7eb;
+        margin-top: 4px;
+        overflow: hidden;
+      }
+
+      .score-fill {
+        position: absolute;
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+      }
+
+      /* Input focus effects */
+      .form-input:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+      }
+    </style>
+  </head>
+
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-4 md:p-6"
+  >
+    <!-- Back button -->
+    <div class="absolute top-4 left-4 md:top-6 md:left-6 z-10">
+      <a
+        href="{{ url_for('dashboard_redirect') if session.get('role') else '/' }}"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white smooth-transition shadow-sm"
+      >
+        <i class="fa-solid fa-arrow-left text-slate-600"></i>
+        <span class="text-sm font-medium text-slate-700 hidden md:inline"
+          >Back to Dashboard</span
+        >
+      </a>
+    </div>
+
+    <div class="w-full max-w-6xl mx-auto animate-fade-in">
+      <!-- Header -->
+      <div class="text-center mb-8 md:mb-12">
+        <div
+          class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 mb-4 shadow-lg"
+        >
+          <i class="fa-solid fa-brain text-white text-2xl"></i>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
+          AI Performance Predictor
+        </h1>
+        <p class="text-slate-600 max-w-2xl mx-auto">
+          Enter academic metrics below to get an AI-powered prediction of
+          end-term score.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <!-- Left Column - Prediction Form -->
+        <div class="lg:col-span-2">
+          <div class="glass rounded-3xl shadow-xl p-6 md:p-8">
+            <!-- Form Header -->
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-xl font-bold text-slate-900">
+                Enter Student Metrics
+              </h2>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-primary-600"></i>
+                <span class="text-sm font-medium text-primary-600"
+                  >AI Model: End-term Predictor</span
+                >
+              </div>
+            </div>
+
+            <!-- Score Summary Card -->
+            <div
+              id="score-summary"
+              class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100"
+            >
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-900">Score Summary</h3>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="w-2 h-2 bg-green-500 rounded-full animate-pulse"
+                  ></span>
+                  <span class="text-xs text-green-600 font-medium"
+                    >Real-time Analysis</span
+                  >
+                </div>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                  <div
+                    class="text-2xl font-bold text-slate-900"
+                    id="input-total"
+                  >
+                    0
+                  </div>
+                  <div class="text-xs text-slate-500">Input Total (60)</div>
+                  <div class="score-indicator">
+                    <div
+                      id="input-total-fill"
+                      class="score-fill bg-blue-500"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <div
+                    class="text-2xl font-bold text-slate-900"
+                    id="attendance-display"
+                  >
+                    --
+                  </div>
+                  <div class="text-xs text-slate-500">Attendance</div>
+                </div>
+                <div class="text-center">
+                  <div
+                    class="text-2xl font-bold text-slate-900"
+                    id="study-hours-display"
+                  >
+                    --
+                  </div>
+                  <div class="text-xs text-slate-500">Study Hours</div>
+                </div>
+                <div class="text-center">
+                  <div
+                    class="text-xl font-bold text-slate-900"
+                    id="predicted-endterm-display"
+                  >
+                    --
+                  </div>
+                  <div class="text-xs text-slate-500">Predicted End-term</div>
+                </div>
+              </div>
+
+              <!-- AI Prediction Preview -->
+              <div
+                class="mt-4 p-3 bg-primary-50 rounded-xl border border-primary-200"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-primary-600"></i>
+                    <span class="text-sm font-medium text-slate-700"
+                      >AI Prediction:</span
+                    >
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-lg font-bold text-primary-700"
+                      id="endterm-prediction"
+                      >0</span
+                    >
+                    <span class="text-sm text-slate-500">/40</span>
+                    <span
+                      class="text-xs px-2 py-1 rounded-full bg-primary-100 text-primary-700"
+                      id="category-badge"
+                      >--</span
+                    >
+                  </div>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 flex justify-between">
+                  <span
+                    >Based on assignments (10) + midterm (20) + internal score (30) +
+                    attendance</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <!-- Prediction Form -->
+            <form
+              method="POST"
+              action="/predict"
+              id="prediction-form"
+              class="space-y-6"
+            >
+              <!-- Attendance -->
+              <div class="form-group">
+                <div class="flex items-center justify-between mb-2">
+                  <label
+                    class="text-sm font-semibold text-slate-700 flex items-center gap-2"
+                  >
+                    <i class="fa-solid fa-calendar-check text-blue-500"></i>
+                    Attendance (%)
+                  </label>
+                  <span class="text-sm text-slate-500">Range: 0-100%</span>
+                </div>
+                <div class="relative">
+                  <input
+                    type="number"
+                    name="attendance"
+                    id="attendance"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    placeholder="Enter attendance percentage"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition form-input"
+                    oninput="updateAttendance(this.value)"
+                  />
+                  <div
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                  >
+                    <i class="fa-solid fa-percentage"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Assignments Score (0-10) -->
+              <div class="form-group">
+                <div class="flex items-center justify-between mb-2">
+                  <label
+                    class="text-sm font-semibold text-slate-700 flex items-center gap-2"
+                  >
+                    <i class="fa-solid fa-file-alt text-green-500"></i>
+                    Assignments Score
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <span
+                      class="text-sm text-slate-500"
+                      id="assignments-percentage"
+                      >--</span
+                    >
+                    <span
+                      class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full"
+                      >0-10 marks</span
+                    >
+                  </div>
+                </div>
+                <div class="relative">
+                  <input
+                    type="number"
+                    name="assignments"
+                    id="assignments"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    placeholder="Enter assignments score (0-10)"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition form-input"
+                    oninput="updateAssignments(this.value)"
+                  />
+                  <div
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                  >
+                    <i class="fa-solid fa-star"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Midterm Score (0-20) -->
+              <div class="form-group">
+                <div class="flex items-center justify-between mb-2">
+                  <label
+                    class="text-sm font-semibold text-slate-700 flex items-center gap-2"
+                  >
+                    <i class="fa-solid fa-pen-to-square text-amber-500"></i>
+                    Midterm Score
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-500" id="midterm-percentage"
+                      >--</span
+                    >
+                    <span
+                      class="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full"
+                      >0-20 marks</span
+                    >
+                  </div>
+                </div>
+                <div class="relative">
+                  <input
+                    type="number"
+                    name="midterm"
+                    id="midterm"
+                    min="0"
+                    max="20"
+                    step="0.1"
+                    placeholder="Enter midterm score (0-20)"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition form-input"
+                    oninput="updateMidterm(this.value)"
+                  />
+                  <div
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                  >
+                    <i class="fa-solid fa-pen"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Internal Score (0-30) -->
+              <div class="form-group">
+                <div class="flex items-center justify-between mb-2">
+                  <label
+                    class="text-sm font-semibold text-slate-700 flex items-center gap-2"
+                  >
+                    <i class="fa-solid fa-flask text-purple-500"></i>
+                    Internal Score
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-500" id="internal_score-percentage"
+                      >--</span
+                    >
+                    <span
+                      class="text-xs px-2 py-1 bg-purple-100 text-purple-800 rounded-full"
+                      >0-30 marks</span
+                    >
+                  </div>
+                </div>
+                <div class="relative">
+                  <input
+                    type="number"
+                    name="internal_score"
+                    id="internal_score"
+                    min="0"
+                    max="30"
+                    step="0.1"
+                    placeholder="Enter internal score (0-30)"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition form-input"
+                    oninput="updateInternal_Score(this.value)"
+                  />
+                  <div
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                  >
+                    <i class="fa-solid fa-flask"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Study Hours/Day (For recommendations only) -->
+              <div class="form-group">
+                <div class="flex items-center justify-between mb-2">
+                  <label
+                    class="text-sm font-semibold text-slate-700 flex items-center gap-2"
+                  >
+                    <i class="fa-solid fa-clock text-cyan-500"></i>
+                    Study Hours per Day
+                  </label>
+                  <span class="text-sm text-slate-500">Range: 0-24 hours</span>
+                </div>
+                <div class="relative">
+                  <input
+                    type="number"
+                    name="hours"
+                    id="hours"
+                    min="0"
+                    max="24"
+                    step="0.1"
+                    placeholder="Enter daily study hours (0-24)"
+                    required
+                    class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition form-input"
+                    oninput="updateStudyHours(this.value)"
+                  />
+                  <div
+                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                  >
+                    <i class="fa-solid fa-clock"></i>
+                  </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">
+                  <i class="fa-solid fa-info-circle"></i> Used for
+                  recommendations only, not for prediction
+                </p>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="pt-4">
+                <button
+                  type="submit"
+                  id="predict-button"
+                  class="w-full py-4 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold hover:shadow-xl smooth-transition flex items-center justify-center group shadow-lg animate-pulse-glow"
+                >
+                  <i class="fa-solid fa-brain mr-3"></i>
+                  <span>Predict End-term Score</span>
+                  <i
+                    class="fa-solid fa-arrow-right ml-3 group-hover:translate-x-1 smooth-transition"
+                  ></i>
+                </button>
+
+                <p class="text-xs text-center text-slate-500 mt-3">
+                  <i class="fa-solid fa-shield-alt mr-1"></i>
+                  AI predicts end-term marks (0-40) based on attendance and
+                  academic scores
+                </p>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right Column - Information & Preview -->
+        <div class="space-y-6 md:space-y-8">
+          <!-- Scoring System - Updated -->
+          <div class="glass rounded-3xl shadow-xl p-6">
+            <h3
+              class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-calculator text-primary-600"></i>
+              Scoring System
+            </h3>
+            <div class="space-y-3">
+              <div
+                class="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100"
+              >
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-sm font-bold"
+                  >
+                    1
+                  </div>
+                  <div>
+                    <span class="font-medium text-green-800">Assignments</span>
+                    <div class="text-xs text-green-600">10 marks</div>
+                  </div>
+                </div>
+                <span class="text-sm font-bold text-green-600">10%</span>
+              </div>
+
+              <div
+                class="flex items-center justify-between p-3 rounded-xl bg-amber-50 border border-amber-100"
+              >
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm font-bold"
+                  >
+                    2
+                  </div>
+                  <div>
+                    <span class="font-medium text-amber-800">Midterm</span>
+                    <div class="text-xs text-amber-600">20 marks</div>
+                  </div>
+                </div>
+                <span class="text-sm font-bold text-amber-600">20%</span>
+              </div>
+
+              <div
+                class="flex items-center justify-between p-3 rounded-xl bg-purple-50 border border-purple-100"
+              >
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-sm font-bold"
+                  >
+                    3
+                  </div>
+                  <div>
+                    <span class="font-medium text-purple-800">Internal Score</span>
+                    <div class="text-xs text-purple-600">30 marks</div>
+                  </div>
+                </div>
+                <span class="text-sm font-bold text-purple-600">30%</span>
+              </div>
+
+              <div
+                class="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100"
+              >
+                <div class="flex items-center gap-2">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold"
+                  >
+                    4
+                  </div>
+                  <div>
+                    <span class="font-medium text-blue-800"
+                      >End-term (Predicted)</span
+                    >
+                    <div class="text-xs text-blue-600">40 marks</div>
+                  </div>
+                </div>
+                <span class="text-sm font-bold text-blue-600">40%</span>
+              </div>
+
+              <div class="mt-4 p-3 bg-slate-50 rounded-xl">
+                <div class="text-sm font-semibold text-slate-700 mb-1">
+                  Input Total (Assignments + Midterm + Internal Score)
+                </div>
+                <div class="text-2xl font-bold text-slate-900">60 marks</div>
+                <div class="text-xs text-slate-500">(10 + 20 + 30)</div>
+
+                <div class="mt-3 pt-3 border-t border-slate-200">
+                  <div class="text-sm font-semibold text-slate-700 mb-1">
+                    Final Total (with predicted end-term)
+                  </div>
+                  <div class="text-2xl font-bold text-primary-600">
+                    100 marks
+                  </div>
+                  <div class="text-xs text-slate-500">(60 + 40)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Guide - Updated for 100 marks -->
+          <div class="glass rounded-3xl shadow-xl p-6">
+            <h3
+              class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"
+            >
+              <i class="fa-solid fa-chart-simple text-primary-600"></i>
+              Performance Categories
+            </h3>
+            <div class="space-y-3">
+              <div
+                class="p-3 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="font-medium text-green-800">Excellent</span>
+                  </div>
+                  <span class="text-sm font-bold text-green-600"
+                    >80-100 marks</span
+                  >
+                </div>
+                <div class="text-xs text-green-700">80-100% of total</div>
+              </div>
+              <div
+                class="p-3 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span class="font-medium text-blue-800">Good</span>
+                  </div>
+                  <span class="text-sm font-bold text-blue-600"
+                    >70-79 marks</span
+                  >
+                </div>
+                <div class="text-xs text-blue-700">70-79% of total</div>
+              </div>
+              <div
+                class="p-3 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                    <span class="font-medium text-amber-800">Average</span>
+                  </div>
+                  <span class="text-sm font-bold text-amber-600"
+                    >60-69 marks</span
+                  >
+                </div>
+                <div class="text-xs text-amber-700">60-69% of total</div>
+              </div>
+              <div
+                class="p-3 rounded-xl bg-gradient-to-r from-red-50 to-pink-50 border border-red-100"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span class="font-medium text-red-800"
+                      >Needs Improvement</span
+                    >
+                  </div>
+                  <span class="text-sm font-bold text-red-600"
+                    >Below 60 marks</span
+                  >
+                </div>
+                <div class="text-xs text-red-700">Below 60% of total</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Fill Buttons - Updated -->
+          <div class="glass rounded-3xl shadow-xl p-6">
+            <h3 class="text-lg font-bold text-slate-900 mb-4">
+              Quick Fill Examples
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onclick="fillExample('excellent')"
+                class="p-3 rounded-xl bg-green-50 hover:bg-green-100 border border-green-100 smooth-transition text-sm"
+              >
+                <div class="font-medium text-green-800">Excellent</div>
+                <div class="text-xs text-green-600">
+                  A:9/10, M:18/20, T:27/30, Att:95%
+                </div>
+              </button>
+              <button
+                type="button"
+                onclick="fillExample('good')"
+                class="p-3 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 smooth-transition text-sm"
+              >
+                <div class="font-medium text-blue-800">Good</div>
+                <div class="text-xs text-blue-600">
+                  A:8/10, M:16/20, T:24/30, Att:85%
+                </div>
+              </button>
+              <button
+                type="button"
+                onclick="fillExample('average')"
+                class="p-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-100 smooth-transition text-sm"
+              >
+                <div class="font-medium text-amber-800">Average</div>
+                <div class="text-xs text-amber-600">
+                  A:6/10, M:12/20, T:18/30, Att:75%
+                </div>
+              </button>
+              <button
+                type="button"
+                onclick="fillExample('at-risk')"
+                class="p-3 rounded-xl bg-red-50 hover:bg-red-100 border border-red-100 smooth-transition text-sm"
+              >
+                <div class="font-medium text-red-800">At Risk</div>
+                <div class="text-xs text-red-600">
+                  A:4/10, M:8/20, T:12/30, Att:58%
+                </div>
+              </button>
+              <button
+                type="button"
+                onclick="clearForm()"
+                class="col-span-2 p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 smooth-transition text-sm"
+              >
+                <i class="fa-solid fa-eraser mr-2"></i>
+                Clear Form
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer note -->
+      <div class="text-center mt-8 text-sm text-slate-500">
+        <p>
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Input total = Assignments (10) + Midterm (20) + Internal Score (30) = 60 marks.
+          AI predicts end-term score (0-40) based on attendance and academic
+          performance.
+        </p>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // Global variables
+      let currentAttendance = 0;
+      let currentAssignments = 0;
+      let currentMidterm = 0;
+      let currentInternal_Score = 0;
+      let currentHours = 0;
+
+      // Update attendance
+      function updateAttendance(value) {
+        currentAttendance = Math.min(100, Math.max(0, parseFloat(value) || 0));
+        document.getElementById("attendance-display").textContent =
+          currentAttendance + "%";
+        calculateInputTotal();
+        predictEndterm();
+      }
+
+      // Update assignments (0-10)
+      function updateAssignments(value) {
+        currentAssignments = Math.min(10, Math.max(0, parseFloat(value) || 0));
+        const percentage = ((currentAssignments / 10) * 100).toFixed(1);
+        document.getElementById("assignments-percentage").textContent =
+          percentage + "%";
+        calculateInputTotal();
+        predictEndterm();
+      }
+
+      // Update midterm (0-20)
+      function updateMidterm(value) {
+        currentMidterm = Math.min(20, Math.max(0, parseFloat(value) || 0));
+        const percentage = ((currentMidterm / 20) * 100).toFixed(1);
+        document.getElementById("midterm-percentage").textContent =
+          percentage + "%";
+        calculateInputTotal();
+        predictEndterm();
+      }
+
+      // Update internal score (0-30)
+      function updateInternal_Score(value) {
+        currentInternal_Score = Math.min(30, Math.max(0, parseFloat(value) || 0));
+        const percentage = ((currentInternal_Score / 30) * 100).toFixed(1);
+        document.getElementById("internal_score-percentage").textContent =
+          percentage + "%";
+        calculateInputTotal();
+        predictEndterm();
+      }
+
+      // Update study hours (for display only)
+      function updateStudyHours(value) {
+        currentHours = Math.min(24, Math.max(0, parseFloat(value) || 0));
+        document.getElementById("study-hours-display").textContent =
+          currentHours;
+        calculateInputTotal();
+        // Note: predictEndterm() is NOT called from here anymore
+      }
+
+      // Calculate input total (60 marks max)
+      function calculateInputTotal() {
+        const inputTotal = currentAssignments + currentMidterm + currentInternal_Score;
+        const percentage = (inputTotal / 60) * 100;
+
+        document.getElementById("input-total").textContent =
+          inputTotal.toFixed(1);
+        document.getElementById("input-total-fill").style.width =
+          percentage + "%";
+
+        return inputTotal;
+      }
+
+      // Predict end-term score (0-40) - WITHOUT study hours
+      function predictEndterm() {
+        const inputTotal = currentAssignments + currentMidterm + currentInternal_Score;
+        const inputPercentage = inputTotal / 60;
+
+        // Updated prediction formula - study hours removed
+        let predictedEndterm = 0;
+
+        // Base from academic scores (70% weight)
+        predictedEndterm = inputPercentage * 28; // 70% of 40 = 28 marks max
+
+        // Attendance impact (30% weight)
+        const attendanceFactor = currentAttendance / 100;
+        predictedEndterm += attendanceFactor * 12; // 30% of 40 = 12 marks max
+
+        // Ensure within bounds
+        predictedEndterm = Math.min(
+          40,
+          Math.max(0, Math.round(predictedEndterm * 10) / 10),
+        );
+
+        // Calculate total score (input 60 + predicted 40 = 100)
+        const totalScore = inputTotal + predictedEndterm;
+
+        // Update displays
+        document.getElementById("endterm-prediction").textContent =
+          predictedEndterm.toFixed(1);
+        document.getElementById("predicted-endterm-display").textContent =
+          predictedEndterm.toFixed(1);
+
+        // Determine category
+        let category = "--";
+        let categoryColor = "bg-primary-100 text-primary-700";
+
+        if (totalScore >= 80) {
+          category = "Excellent";
+          categoryColor = "bg-green-100 text-green-700";
+        } else if (totalScore >= 70) {
+          category = "Good";
+          categoryColor = "bg-blue-100 text-blue-700";
+        } else if (totalScore >= 60) {
+          category = "Average";
+          categoryColor = "bg-amber-100 text-amber-700";
+        } else if (totalScore > 0) {
+          category = "Needs Improvement";
+          categoryColor = "bg-red-100 text-red-700";
+        }
+
+        document.getElementById("category-badge").textContent = category;
+        document.getElementById("category-badge").className =
+          `text-xs px-2 py-1 rounded-full ${categoryColor}`;
+
+        // Update total score fill color based on category
+        const totalPercentage = (totalScore / 100) * 100;
+        document.getElementById("input-total-fill").style.width =
+          totalPercentage + "%";
+
+        if (totalScore >= 80) {
+          document.getElementById("input-total-fill").style.backgroundColor =
+            "#10b981";
+        } else if (totalScore >= 70) {
+          document.getElementById("input-total-fill").style.backgroundColor =
+            "#3b82f6";
+        } else if (totalScore >= 60) {
+          document.getElementById("input-total-fill").style.backgroundColor =
+            "#f59e0b";
+        } else {
+          document.getElementById("input-total-fill").style.backgroundColor =
+            "#ef4444";
+        }
+      }
+
+      // Quick fill examples
+      const examples = {
+        excellent: {
+          attendance: 95,
+          assignments: 9,
+          midterm: 18,
+          internal_score: 27,
+          hours: 5,
+        },
+        good: {
+          attendance: 85,
+          assignments: 8,
+          midterm: 16,
+          internal_score: 24,
+          hours: 4,
+        },
+        average: {
+          attendance: 75,
+          assignments: 6,
+          midterm: 12,
+          internal_score: 18,
+          hours: 2.5,
+        },
+        "at-risk": {
+          attendance: 58,
+          assignments: 4,
+          midterm: 8,
+          internal_score: 12,
+          hours: 1.2,
+        },
+      };
+
+      function fillExample(type) {
+        const example = examples[type];
+        if (!example) return;
+
+        // Update all fields
+        document.querySelector('input[name="attendance"]').value =
+          example.attendance;
+        document.querySelector('input[name="assignments"]').value =
+          example.assignments;
+        document.querySelector('input[name="midterm"]').value = example.midterm;
+        document.querySelector('input[name="internal_score"]').value = example.internal_score;
+        document.querySelector('input[name="hours"]').value = example.hours;
+
+        // Update display values
+        updateAttendance(example.attendance);
+        updateAssignments(example.assignments);
+        updateMidterm(example.midterm);
+        updateInternal_Score(example.internal_score);
+        updateStudyHours(example.hours);
+
+        // Call predict after all updates (study hours not included)
+        predictEndterm();
+
+        showNotification(`Loaded ${type} student example`, "success");
+      }
+
+      // Clear form
+      function clearForm() {
+        document.getElementById("prediction-form").reset();
+
+        // Reset all values
+        currentAttendance = 0;
+        currentAssignments = 0;
+        currentMidterm = 0;
+        currentInternal_Score = 0;
+        currentHours = 0;
+
+        // Reset display values
+        document.getElementById("attendance-display").textContent = "--";
+        document.getElementById("study-hours-display").textContent = "--";
+        document.getElementById("assignments-percentage").textContent = "--";
+        document.getElementById("midterm-percentage").textContent = "--";
+        document.getElementById("internal_score-percentage").textContent = "--";
+        document.getElementById("input-total").textContent = "0";
+        document.getElementById("input-total-fill").style.width = "0%";
+        document.getElementById("input-total-fill").style.backgroundColor =
+          "#3b82f6";
+        document.getElementById("endterm-prediction").textContent = "0";
+        document.getElementById("predicted-endterm-display").textContent = "--";
+        document.getElementById("category-badge").textContent = "--";
+        document.getElementById("category-badge").className =
+          "text-xs px-2 py-1 rounded-full bg-primary-100 text-primary-700";
+
+        showNotification("Form cleared successfully", "info");
+      }
+
+      // Show notification
+      function showNotification(message, type = "info") {
+        const existing = document.querySelector(".custom-notification");
+        if (existing) existing.remove();
+
+        const notification = document.createElement("div");
+        notification.className = `custom-notification fixed top-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg animate-slide-up ${
+          type === "success"
+            ? "bg-green-100 text-green-800 border border-green-200"
+            : type === "error"
+              ? "bg-red-100 text-red-800 border border-red-200"
+              : "bg-blue-100 text-blue-800 border border-blue-200"
+        }`;
+
+        notification.innerHTML = `
+        <div class="flex items-center gap-3">
+          <i class="fa-solid ${
+            type === "success"
+              ? "fa-check-circle"
+              : type === "error"
+                ? "fa-exclamation-circle"
+                : "fa-info-circle"
+          }"></i>
+          <span>${message}</span>
+        </div>
+      `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+
+      // Form submission handling
+      document
+        .getElementById("prediction-form")
+        .addEventListener("submit", function (e) {
+          // Validate inputs
+          const attendance = parseFloat(
+            document.querySelector('[name="attendance"]').value,
+          );
+          const assignments = parseFloat(
+            document.querySelector('[name="assignments"]').value,
+          );
+          const midterm = parseFloat(
+            document.querySelector('[name="midterm"]').value,
+          );
+          const internal_score = parseFloat(
+            document.querySelector('[name="internal_score"]').value,
+          );
+          const hours = parseFloat(
+            document.querySelector('[name="hours"]').value,
+          );
+
+          if (
+            isNaN(attendance) ||
+            isNaN(assignments) ||
+            isNaN(midterm) ||
+            isNaN(internal_score) ||
+            isNaN(hours)
+          ) {
+            e.preventDefault();
+            showNotification(
+              "Please enter valid numbers in all fields",
+              "error",
+            );
+            return;
+          }
+
+          if (attendance < 0 || attendance > 100) {
+            e.preventDefault();
+            showNotification("Attendance must be between 0 and 100%", "error");
+            return;
+          }
+
+          if (assignments < 0 || assignments > 10) {
+            e.preventDefault();
+            showNotification(
+              "Assignments score must be between 0 and 10",
+              "error",
+            );
+            return;
+          }
+
+          if (midterm < 0 || midterm > 20) {
+            e.preventDefault();
+            showNotification("Midterm score must be between 0 and 20", "error");
+            return;
+          }
+
+          if (internal_score < 0 || internal_score > 30) {
+            e.preventDefault();
+            showNotification("Internal score must be between 0 and 30", "error");
+            return;
+          }
+
+          if (hours < 0 || hours > 24) {
+            e.preventDefault();
+            showNotification("Study hours must be between 0 and 24", "error");
+            return;
+          }
+
+          // Show loading state
+          const button = document.getElementById("predict-button");
+          const originalText = button.innerHTML;
+
+          button.disabled = true;
+          button.innerHTML = `
+            <i class="fa-solid fa-spinner animate-spin mr-3"></i>
+            <span>Predicting End-term Score...</span>
+          `;
+
+          // Form will submit normally
+        });
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+          document.querySelector('input[name="attendance"]').focus();
+        }, 300);
+        // Initial prediction
+        predictEndterm();
+      });
+    </script>
+  </body>
+</html>

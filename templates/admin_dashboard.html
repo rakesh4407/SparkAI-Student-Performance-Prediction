@@ -1,0 +1,968 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SparkAI • Admin Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563eb",
+              success: "#16a34a",
+              danger: "#ef4444",
+              warning: "#f59e0b",
+              purple: "#8b5cf6",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* Animation for messages */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .alert-slide {
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .score-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-gradient-to-br from-slate-50 via-indigo-50 to-sky-50 text-slate-800"
+  >
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
+      <div
+        class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="group w-10 h-10 rounded-xl bg-black flex items-center justify-center cursor-pointer"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="w-6 h-6 text-white"
+              fill="currentColor"
+            >
+              <rect
+                x="6"
+                y="5"
+                width="12"
+                height="3"
+                class="transition-transform duration-300 group-hover:-translate-y-0.5"
+              />
+              <rect x="6" y="10.5" width="12" height="3" />
+              <rect
+                x="6"
+                y="16"
+                width="12"
+                height="3"
+                class="transition-transform duration-300 group-hover:translate-y-0.5"
+              />
+            </svg>
+          </div>
+
+          <div>
+            <h1 class="font-bold">SparkAI</h1>
+            <p class="text-xs text-slate-500">Admin Dashboard</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-6">
+          <nav class="hidden md:flex gap-4">
+            <a href="/teacher-dashboard" class="hover:text-primary"
+              >Teacher View</a
+            >
+            <a href="/admin-dashboard" class="text-primary font-semibold"
+              >Admin Panel</a
+            >
+          </nav>
+          <a href="/logout" class="text-danger font-medium hover:underline"
+            >Logout</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== SUCCESS/ERROR MESSAGES ===== -->
+    {% if session.get('upload_message') %}
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div
+        class="bg-green-50 border border-green-200 rounded-xl p-4 alert-slide"
+      >
+        <div class="flex items-center gap-3">
+          <svg
+            class="w-5 h-5 text-green-600"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <p class="text-green-700 font-medium">
+            {{ session.pop('upload_message', '') }}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ===== MAIN ===== -->
+    <main class="max-w-7xl mx-auto px-6 py-10 space-y-14">
+      <!-- STATS SUMMARY -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-3xl p-6 shadow hover:shadow-xl transition">
+          <p class="text-slate-500">Total Users</p>
+          <h3 class="text-4xl font-bold mt-3">{{ users|length }}</h3>
+          <p class="text-sm text-slate-500 mt-2">
+            {% set admin_count = users|selectattr('role', 'equalto',
+            'admin')|list|length %} {% set teacher_count =
+            users|selectattr('role', 'equalto', 'teacher')|list|length %} {% set
+            student_count = users|selectattr('role', 'equalto',
+            'student')|list|length %} {{ admin_count }} Admin, {{ teacher_count
+            }} Teacher, {{ student_count }} Student
+          </p>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow hover:shadow-xl transition">
+          <p class="text-slate-500">Total Students</p>
+          <h3 class="text-4xl font-bold mt-3">{{ students|length }}</h3>
+          <p class="text-sm text-slate-500 mt-2">
+            {% set poor_count = students|selectattr('performance', 'equalto',
+            'Poor')|list|length %} {% set excel_count =
+            students|selectattr('performance', 'equalto',
+            'Excellent')|list|length %} {{ poor_count }} Poor, {{ excel_count }}
+            Excellent performance
+          </p>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow hover:shadow-xl transition">
+          <p class="text-slate-500">Scoring System</p>
+          <div class="mt-4 space-y-2">
+            <div class="flex justify-between text-sm">
+              <span>Assignments:</span>
+              <span class="font-semibold">10 marks</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span>Midterm:</span>
+              <span class="font-semibold">20 marks</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span>Internal Score:</span>
+              <span class="font-semibold">30 marks</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span>End-term:</span>
+              <span class="font-semibold">40 marks</span>
+            </div>
+            <div
+              class="flex justify-between text-sm font-bold border-t pt-2 mt-2"
+            >
+              <span>Total:</span>
+              <span class="text-primary">100 marks</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADD USER -->
+      <section class="bg-white rounded-3xl shadow p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+          <svg
+            class="w-6 h-6 text-primary"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Add User Account
+        </h2>
+        <form
+          action="/admin-add-user"
+          method="POST"
+          class="grid grid-cols-1 md:grid-cols-5 gap-4"
+          onsubmit="return validateUserForm();"
+          id="userForm"
+        >
+          <div class="relative">
+            <input
+              name="username"
+              placeholder="Username"
+              required
+              minlength="3"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="usernameInput"
+            />
+            <div class="text-xs text-slate-500 mt-1">Minimum 3 characters</div>
+          </div>
+          <div class="relative">
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              required
+              minlength="6"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="passwordInput"
+            />
+            <div class="text-xs text-slate-500 mt-1">Minimum 6 characters</div>
+          </div>
+          <div class="relative">
+            <select
+              name="role"
+              required
+              class="px-4 py-3 rounded-xl border w-full"
+              id="roleSelect"
+              onchange="toggleRollNoField()"
+            >
+              <option value="">Select Role</option>
+              <option value="student">Student</option>
+              <option value="teacher">Teacher</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="relative">
+            <input
+              name="roll_no"
+              placeholder="Roll No (student only)"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="rollNoInput"
+              disabled
+            />
+            <div class="text-xs text-slate-500 mt-1" id="rollNoHelp">
+              Only for students
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="px-6 py-3 rounded-xl bg-primary text-white hover:bg-blue-700 transition font-medium"
+          >
+            Add User
+          </button>
+        </form>
+      </section>
+
+      <!-- USERS TABLE -->
+      <section class="bg-white rounded-3xl shadow p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold flex items-center gap-3">
+            <svg
+              class="w-6 h-6 text-primary"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"
+              />
+            </svg>
+            All Users ({{ users|length }})
+          </h2>
+          <div class="text-sm text-slate-500">Showing all system users</div>
+        </div>
+        <div class="overflow-x-auto rounded-xl border">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50">
+              <tr>
+                <th class="py-3 px-4 text-left font-semibold text-slate-700">
+                  ID
+                </th>
+                <th class="py-3 px-4 text-left font-semibold text-slate-700">
+                  Username
+                </th>
+                <th class="py-3 px-4 text-left font-semibold text-slate-700">
+                  Role
+                </th>
+                <th class="py-3 px-4 text-left font-semibold text-slate-700">
+                  Roll No
+                </th>
+                <th class="py-3 px-4 text-left font-semibold text-slate-700">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if users %} {% for u in users %}
+              <tr
+                class="border-t hover:bg-slate-50 transition {% if u.role == 'admin' %}bg-blue-50{% endif %}"
+              >
+                <td class="py-3 px-4">{{ u.id }}</td>
+                <td class="py-3 px-4">
+                  <div class="flex items-center gap-2">
+                    {{ u.username }} {% if u.role == 'admin' %}
+                    <span
+                      class="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full"
+                      >Admin</span
+                    >
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="py-3 px-4">
+                  <span
+                    class="capitalize px-3 py-1 rounded-full text-xs font-medium {% if u.role == 'admin' %}bg-blue-100 text-blue-800 {% elif u.role == 'teacher' %}bg-purple-100 text-purple-800 {% else %}bg-green-100 text-green-800{% endif %}"
+                  >
+                    {{ u.role }}
+                  </span>
+                </td>
+                <td class="py-3 px-4">
+                  {% if u.roll_no %}
+                  <a
+                    href="/student/{{ u.roll_no }}"
+                    class="text-primary hover:underline"
+                  >
+                    {{ u.roll_no }}
+                  </a>
+                  {% else %}
+                  <span class="text-slate-400">-</span>
+                  {% endif %}
+                </td>
+                <td class="py-3 px-4">
+                  {% if u.role != 'admin' %}
+                  <a
+                    href="/admin-delete-user/{{ u.id }}"
+                    class="text-danger hover:underline font-medium"
+                    onclick="return confirmDeleteUser('{{ u.username }}')"
+                  >
+                    Delete
+                  </a>
+                  {% else %}
+                  <span class="text-slate-400 text-sm">Protected</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %} {% else %}
+              <tr>
+                <td colspan="5" class="py-8 text-center text-slate-500">
+                  <div class="flex flex-col items-center gap-3">
+                    <svg
+                      class="w-12 h-12 text-slate-300"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <p>No users found. Add your first user above.</p>
+                  </div>
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CSV UPLOAD - UPDATED with internal_score -->
+      <section class="bg-white rounded-3xl shadow p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+          <svg
+            class="w-6 h-6 text-success"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          Bulk Upload Students (CSV)
+        </h2>
+        <div class="mb-6 p-4 bg-blue-50 rounded-xl">
+          <h3 class="font-semibold text-blue-800 mb-2">
+            📋 CSV Format Requirements (Updated):
+          </h3>
+          <ul class="text-sm text-blue-700 space-y-1">
+            <li>
+              • Required columns:
+              <code class="bg-blue-100 px-2 py-1 rounded"
+                >roll_no, name, attendance, assignments_score, midterm_score,
+                internal_score, final_score, study_hours, performance</code
+              >
+            </li>
+            <li>
+              • Score ranges:
+              <span class="score-badge bg-green-100 text-green-800">A(10)</span>
+              <span class="score-badge bg-amber-100 text-amber-800">M(20)</span>
+              <span class="score-badge bg-purple-100 text-purple-800"
+                >I(30)</span
+              >
+              <span class="score-badge bg-blue-100 text-blue-800">E(40)</span>
+            </li>
+            <li>
+              • Performance values:
+              <code class="bg-blue-100 px-2 py-1 rounded"
+                >Poor, Average, Good, Excellent</code
+              >
+              (based on total 100 marks)
+            </li>
+            <li>
+              • Student login accounts will be auto-generated (username:
+              student{roll_no}, password: student123)
+            </li>
+          </ul>
+        </div>
+        <form
+          action="/admin-upload-csv"
+          method="POST"
+          enctype="multipart/form-data"
+          class="space-y-4"
+          onsubmit="return validateCSVUpload();"
+          id="csvForm"
+        >
+          <div class="flex flex-wrap gap-4 items-center">
+            <div class="flex-1 min-w-[300px]">
+              <input
+                type="file"
+                name="csv_file"
+                accept=".csv"
+                required
+                class="px-4 py-3 rounded-xl border w-full"
+                id="csvFileInput"
+              />
+            </div>
+            <button
+              type="submit"
+              class="px-8 py-3 rounded-xl bg-success text-white hover:bg-green-700 transition font-medium flex items-center gap-2"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fill-rule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Upload CSV
+            </button>
+          </div>
+          <div class="text-sm text-slate-500 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            File should be in CSV format. Maximum size: 10MB.
+          </div>
+        </form>
+      </section>
+
+      <!-- ADD STUDENT - UPDATED with internal_score -->
+      <section class="bg-white rounded-3xl shadow p-8">
+        <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+          <svg
+            class="w-6 h-6 text-primary"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path
+              d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"
+            />
+          </svg>
+          Add Student Manually
+        </h2>
+        <form
+          action="/admin-add-student"
+          method="POST"
+          class="grid grid-cols-1 md:grid-cols-3 gap-4"
+          onsubmit="return validateStudentForm();"
+          id="studentForm"
+        >
+          <!-- Academic Info -->
+          <div class="md:col-span-3 mb-4 pb-4 border-b">
+            <h3 class="font-semibold text-slate-700 mb-3">
+              Academic Information (Total: 100 marks)
+            </h3>
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Roll Number *</label
+            >
+            <input
+              name="roll_no"
+              placeholder="e.g., 101"
+              required
+              type="number"
+              min="1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentRollNo"
+            />
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block">Full Name *</label>
+            <input
+              name="name"
+              placeholder="Student Name"
+              required
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentName"
+            />
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Attendance (%) *</label
+            >
+            <input
+              name="attendance"
+              placeholder="0-100"
+              required
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentAttendance"
+            />
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Assignments Score (0-10) *</label
+            >
+            <input
+              name="assignments"
+              placeholder="0-10"
+              required
+              type="number"
+              min="0"
+              max="10"
+              step="0.1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentAssignments"
+            />
+            <div class="text-xs text-slate-500 mt-1">Max 10 marks</div>
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Midterm Score (0-20) *</label
+            >
+            <input
+              name="midterm"
+              placeholder="0-20"
+              required
+              type="number"
+              min="0"
+              max="20"
+              step="0.1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentMidterm"
+            />
+            <div class="text-xs text-slate-500 mt-1">Max 20 marks</div>
+          </div>
+
+          <!-- Internal Score Field (FIXED ID) -->
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Internal Score (0-30) *</label
+            >
+            <input
+              name="internal_score"
+              placeholder="0-30"
+              required
+              type="number"
+              min="0"
+              max="30"
+              step="0.1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentInternalScore"
+            />
+            <div class="text-xs text-slate-500 mt-1">Max 30 marks</div>
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >End-term Score (0-40) *</label
+            >
+            <input
+              name="final"
+              placeholder="0-40"
+              required
+              type="number"
+              min="0"
+              max="40"
+              step="0.1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentFinal"
+            />
+            <div class="text-xs text-slate-500 mt-1">Max 40 marks</div>
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Study Hours/Day *</label
+            >
+            <input
+              name="study_hours"
+              placeholder="e.g., 2.5"
+              required
+              type="number"
+              min="0"
+              max="24"
+              step="0.1"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studyHours"
+            />
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block"
+              >Performance Category *</label
+            >
+            <select
+              name="performance"
+              required
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentPerformance"
+            >
+              <option value="">Select Performance</option>
+              <option value="Poor">Poor (Below 60)</option>
+              <option value="Average">Average (60-69)</option>
+              <option value="Good">Good (70-79)</option>
+              <option value="Excellent">Excellent (80-100)</option>
+            </select>
+          </div>
+
+          <!-- Total Preview -->
+          <div class="md:col-span-3 bg-slate-50 p-4 rounded-xl">
+            <div class="flex justify-between items-center">
+              <span class="font-medium">Total Score Preview:</span>
+              <span class="text-lg font-bold text-primary" id="totalPreview"
+                >0/100</span
+              >
+            </div>
+            <div class="text-xs text-slate-500 mt-1">
+              Assignments(10) + Midterm(20) + Internal Score(30) + End-term(40)
+              = 100
+            </div>
+          </div>
+
+          <!-- Login Info -->
+          <div class="md:col-span-3 mt-4 mb-4 pb-4 border-b">
+            <h3 class="font-semibold text-slate-700 mb-3">Login Credentials</h3>
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block">Username *</label>
+            <input
+              name="username"
+              placeholder="Student Username"
+              required
+              minlength="3"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentUsername"
+            />
+          </div>
+
+          <div class="relative">
+            <label class="text-sm text-slate-600 mb-1 block">Password *</label>
+            <input
+              name="password"
+              type="password"
+              placeholder="Student Password"
+              required
+              minlength="6"
+              class="px-4 py-3 rounded-xl border w-full"
+              id="studentPassword"
+            />
+          </div>
+
+          <div class="relative">
+            <button
+              type="submit"
+              class="px-6 py-3 rounded-xl bg-primary text-white hover:bg-blue-700 transition font-medium h-full w-full"
+            >
+              Add Student
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      // Toggle roll number field based on role selection
+      function toggleRollNoField() {
+        const roleSelect = document.getElementById("roleSelect");
+        const rollNoInput = document.getElementById("rollNoInput");
+        const rollNoHelp = document.getElementById("rollNoHelp");
+
+        if (roleSelect.value === "student") {
+          rollNoInput.disabled = false;
+          rollNoInput.required = true;
+          rollNoHelp.textContent = "Required for student accounts";
+          rollNoHelp.classList.remove("text-slate-500");
+          rollNoHelp.classList.add("text-blue-600");
+        } else {
+          rollNoInput.disabled = true;
+          rollNoInput.required = false;
+          rollNoInput.value = "";
+          rollNoHelp.textContent = "Only for students";
+          rollNoHelp.classList.remove("text-blue-600");
+          rollNoHelp.classList.add("text-slate-500");
+        }
+      }
+
+      // Calculate total preview
+      function updateTotalPreview() {
+        const assignments =
+          parseFloat(document.getElementById("studentAssignments")?.value) || 0;
+        const midterm =
+          parseFloat(document.getElementById("studentMidterm")?.value) || 0;
+        const internal_score =
+          parseFloat(document.getElementById("studentInternalScore")?.value) ||
+          0;
+        const final =
+          parseFloat(document.getElementById("studentFinal")?.value) || 0;
+
+        const total = assignments + midterm + internal_score + final;
+        const totalPreview = document.getElementById("totalPreview");
+
+        if (totalPreview) {
+          totalPreview.textContent = total.toFixed(1) + "/100";
+
+          // Color code the total
+          if (total >= 80) {
+            totalPreview.className = "text-lg font-bold text-success";
+          } else if (total >= 70) {
+            totalPreview.className = "text-lg font-bold text-info";
+          } else if (total >= 60) {
+            totalPreview.className = "text-lg font-bold text-warning";
+          } else {
+            totalPreview.className = "text-lg font-bold text-danger";
+          }
+        }
+      }
+
+      // Download CSV template - UPDATED with internal_score
+      function downloadSampleCSV() {
+        const csvContent =
+          "roll_no,name,attendance,assignments_score,midterm_score,internal_score,final_score,study_hours,performance\n" +
+          "101,John Doe,85.5,8.5,17.0,25.0,32.0,3.5,Good\n" +
+          "102,Jane Smith,92.0,9.5,19.0,28.0,36.0,4.2,Excellent\n" +
+          "103,Robert Johnson,65.0,4.0,8.0,12.0,18.0,1.8,Poor";
+
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "student_template.csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }
+
+      // Clear all form inputs
+      function clearAllForms() {
+        document.getElementById("userForm").reset();
+        document.getElementById("csvForm").reset();
+        document.getElementById("studentForm").reset();
+        toggleRollNoField();
+        updateTotalPreview();
+
+        // Show success message
+        showAlert("All forms have been cleared.", "success");
+      }
+
+      // Show alert message
+      function showAlert(message, type = "info") {
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `fixed top-4 right-4 z-50 px-6 py-4 rounded-xl shadow-lg alert-slide ${
+          type === "success"
+            ? "bg-green-100 text-green-800 border border-green-200"
+            : type === "error"
+              ? "bg-red-100 text-red-800 border border-red-200"
+              : "bg-blue-100 text-blue-800 border border-blue-200"
+        }`;
+
+        alertDiv.innerHTML = `
+          <div class="flex items-center gap-3">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+            </svg>
+            <span class="font-medium">${message}</span>
+          </div>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        // Remove alert after 5 seconds
+        setTimeout(() => {
+          alertDiv.remove();
+        }, 5000);
+      }
+
+      // Confirm user deletion
+      function confirmDeleteUser(username) {
+        return confirm(
+          `Are you sure you want to delete user "${username}"? This action cannot be undone.`,
+        );
+      }
+
+      // Form validation
+      function validateUserForm() {
+        const username = document.getElementById("usernameInput").value;
+        const password = document.getElementById("passwordInput").value;
+        const role = document.getElementById("roleSelect").value;
+
+        if (username.length < 3) {
+          showAlert("Username must be at least 3 characters long.", "error");
+          return false;
+        }
+
+        if (password.length < 6) {
+          showAlert("Password must be at least 6 characters long.", "error");
+          return false;
+        }
+
+        if (!role) {
+          showAlert("Please select a role.", "error");
+          return false;
+        }
+
+        return true;
+      }
+
+      function validateStudentForm() {
+        const rollNo = document.getElementById("studentRollNo").value;
+        const name = document.getElementById("studentName").value;
+        const attendance = document.getElementById("studentAttendance").value;
+        const assignments = document.getElementById("studentAssignments").value;
+        const midterm = document.getElementById("studentMidterm").value;
+        const internal_score = document.getElementById(
+          "studentInternalScore",
+        ).value;
+        const final = document.getElementById("studentFinal").value;
+
+        if (rollNo < 1) {
+          showAlert("Roll number must be a positive number.", "error");
+          return false;
+        }
+
+        if (!name.trim()) {
+          showAlert("Please enter student name.", "error");
+          return false;
+        }
+
+        if (attendance < 0 || attendance > 100) {
+          showAlert("Attendance must be between 0 and 100%.", "error");
+          return false;
+        }
+
+        if (assignments < 0 || assignments > 10) {
+          showAlert("Assignments score must be between 0 and 10.", "error");
+          return false;
+        }
+
+        if (midterm < 0 || midterm > 20) {
+          showAlert("Midterm score must be between 0 and 20.", "error");
+          return false;
+        }
+
+        if (internal_score < 0 || internal_score > 30) {
+          showAlert("Internal score must be between 0 and 30.", "error");
+          return false;
+        }
+
+        if (final < 0 || final > 40) {
+          showAlert("End-term score must be between 0 and 40.", "error");
+          return false;
+        }
+
+        return true;
+      }
+
+      function validateCSVUpload() {
+        const fileInput = document.getElementById("csvFileInput");
+
+        if (!fileInput.files.length) {
+          showAlert("Please select a CSV file to upload.", "error");
+          return false;
+        }
+
+        const file = fileInput.files[0];
+        if (!file.name.endsWith(".csv")) {
+          showAlert("Please select a CSV file (.csv extension).", "error");
+          return false;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          // 10MB limit
+          showAlert("File size must be less than 10MB.", "error");
+          return false;
+        }
+
+        return true;
+      }
+
+      // Auto-fill username and calculate total
+      document
+        .getElementById("studentRollNo")
+        ?.addEventListener("input", function () {
+          const rollNo = this.value;
+          const usernameInput = document.getElementById("studentUsername");
+          const currentUsername = usernameInput.value;
+
+          if (!currentUsername || currentUsername.startsWith("student")) {
+            usernameInput.value = `student${rollNo}`;
+          }
+        });
+
+      // Add event listeners for total preview
+      const scoreInputs = [
+        "studentAssignments",
+        "studentMidterm",
+        "studentInternalScore",
+        "studentFinal",
+      ];
+      scoreInputs.forEach((id) => {
+        document
+          .getElementById(id)
+          ?.addEventListener("input", updateTotalPreview);
+      });
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        toggleRollNoField();
+        updateTotalPreview();
+
+        // Check for URL success parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("success")) {
+          showAlert("Operation completed successfully!", "success");
+        }
+      });
+    </script>
+  </body>
+</html>

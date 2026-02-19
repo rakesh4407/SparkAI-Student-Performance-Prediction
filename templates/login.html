@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SparkAI • Secure Login</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+              },
+              accent: {
+                500: "#22c55e",
+                600: "#16a34a",
+              },
+            },
+            animation: {
+              float: "float 6s ease-in-out infinite",
+              "fade-in": "fadeIn 0.8s ease-out",
+              "slide-up": "slideUp 0.5s ease-out",
+              "pulse-glow": "pulseGlow 2s ease-in-out infinite",
+            },
+            keyframes: {
+              float: {
+                "0%, 100%": { transform: "translateY(0px)" },
+                "50%": { transform: "translateY(-10px)" },
+              },
+              fadeIn: {
+                from: { opacity: 0 },
+                to: { opacity: 1 },
+              },
+              slideUp: {
+                from: { transform: "translateY(10px)", opacity: 0 },
+                to: { transform: "translateY(0)", opacity: 1 },
+              },
+              pulseGlow: {
+                "0%, 100%": { boxShadow: "0 0 20px rgba(59, 130, 246, 0.5)" },
+                "50%": { boxShadow: "0 0 30px rgba(59, 130, 246, 0.8)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/a2e0e6ad65.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+
+      /* Glass effect */
+      .glass {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      /* Gradient border */
+      .gradient-border {
+        position: relative;
+        background:
+          linear-gradient(white, white) padding-box,
+          linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4) border-box;
+        border: 2px solid transparent;
+      }
+
+      /* Custom scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Smooth transitions */
+      .smooth-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Particle background */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .particle {
+        position: absolute;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 50%;
+        animation: float 15s infinite linear;
+      }
+    </style>
+  </head>
+
+  <body
+    class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4"
+  >
+    <!-- Background particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Floating decorative elements -->
+    <div
+      class="absolute top-10 left-10 w-20 h-20 bg-gradient-to-br from-blue-200/30 to-purple-200/30 rounded-full animate-float"
+    ></div>
+    <div
+      class="absolute bottom-20 right-20 w-32 h-32 bg-gradient-to-br from-cyan-200/30 to-teal-200/30 rounded-full animate-float"
+      style="animation-delay: 2s"
+    ></div>
+
+    <div
+      class="w-full max-w-6xl glass rounded-[32px] shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 animate-fade-in"
+    >
+      <!-- LEFT PANEL - Brand & Visual -->
+      <div
+        class="hidden lg:flex flex-col justify-between p-10 text-white relative bg-gradient-to-br from-slate-900 via-blue-900 to-sky-900 overflow-hidden"
+      >
+        <!-- Background pattern -->
+        <div class="absolute inset-0 opacity-10">
+          <div
+            class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full -translate-y-32 translate-x-32"
+          ></div>
+          <div
+            class="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full translate-y-48 -translate-x-48"
+          ></div>
+        </div>
+
+        <!-- Header -->
+        <div class="relative z-10">
+          <div class="flex items-center gap-3 mb-8">
+            <div
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg"
+            >
+              <i class="fa-solid fa-graduation-cap text-white text-xl"></i>
+            </div>
+            <div>
+              <h1 class="text-3xl font-bold tracking-tight">SparkAI</h1>
+              <p class="text-sm opacity-80">Intelligence Platform</p>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h2 class="text-2xl font-bold mb-3">
+              Welcome to the Future of Education
+            </h2>
+            <p class="text-blue-100 opacity-90">
+              AI-powered insights transforming how educators predict, analyze,
+              and improve student performance.
+            </p>
+          </div>
+        </div>
+
+        <!-- Feature highlights -->
+        <div class="relative z-10 mb-8">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-brain text-blue-300"></i>
+                <span class="text-sm">AI Predictions</span>
+              </div>
+            </div>
+            <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-green-300"></i>
+                <span class="text-sm">Smart Analytics</span>
+              </div>
+            </div>
+            <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-robot text-purple-300"></i>
+                <span class="text-sm">AI Assistant</span>
+              </div>
+            </div>
+            <div class="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-shield-alt text-amber-300"></i>
+                <span class="text-sm">Secure & Private</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="relative z-10">
+          <div class="flex items-center justify-between text-sm">
+            <div class="text-center">
+              <div class="text-2xl font-bold">500+</div>
+              <div class="opacity-80">Educators</div>
+            </div>
+            <div class="h-8 w-px bg-blue-700"></div>
+            <div class="text-center">
+              <div class="text-2xl font-bold">95%</div>
+              <div class="opacity-80">Accuracy</div>
+            </div>
+            <div class="h-8 w-px bg-blue-700"></div>
+            <div class="text-center">
+              <div class="text-2xl font-bold">24/7</div>
+              <div class="opacity-80">Support</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL - Login Form -->
+      <div class="p-8 md:p-12 lg:p-16">
+        <div class="max-w-md mx-auto">
+          <!-- Header -->
+          <div class="text-center mb-10 animate-slide-up">
+            <div
+              class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 mb-6 shadow-lg"
+            >
+              <i class="fa-solid fa-lock text-white text-2xl"></i>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-900">Welcome Back</h2>
+            <p class="text-slate-500 mt-2">
+              Sign in to access your SparkAI dashboard
+            </p>
+          </div>
+
+          <!-- Error message -->
+          {% if error %}
+          <div
+            class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 animate-slide-up"
+            role="alert"
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-exclamation-triangle text-red-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-red-700 font-medium">{{ error }}</p>
+                <p class="text-red-600 text-sm mt-1">
+                  Please check your credentials and try again
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Login Form -->
+          <form
+            method="POST"
+            action="/login"
+            class="space-y-6 animate-slide-up"
+            style="animation-delay: 0.1s"
+          >
+            <!-- Role Selection -->
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                <i class="fa-solid fa-user-tag mr-2 text-primary-600"></i>
+                Select Your Role
+              </label>
+              <div class="grid grid-cols-3 gap-3">
+                <label class="role-option">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="admin"
+                    class="sr-only"
+                    required
+                  />
+                  <div class="role-option-content">
+                    <i class="fa-solid fa-shield-halved text-lg mb-2"></i>
+                    <span class="text-sm font-medium">Admin</span>
+                  </div>
+                </label>
+                <label class="role-option">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="teacher"
+                    class="sr-only"
+                    required
+                    checked
+                  />
+                  <div class="role-option-content">
+                    <i class="fa-solid fa-chalkboard-teacher text-lg mb-2"></i>
+                    <span class="text-sm font-medium">Teacher</span>
+                  </div>
+                </label>
+                <label class="role-option">
+                  <input
+                    type="radio"
+                    name="role"
+                    value="student"
+                    class="sr-only"
+                    required
+                  />
+                  <div class="role-option-content">
+                    <i class="fa-solid fa-user-graduate text-lg mb-2"></i>
+                    <span class="text-sm font-medium">Student</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Username -->
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">
+                <i class="fa-solid fa-user mr-2 text-primary-600"></i>
+                Username
+              </label>
+              <div class="relative">
+                <input
+                  type="text"
+                  name="username"
+                  required
+                  placeholder="Enter your username"
+                  class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                  autocomplete="username"
+                />
+                <div
+                  class="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"
+                >
+                  <i class="fa-solid fa-at"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="block text-sm font-semibold text-slate-700">
+                  <i class="fa-solid fa-key mr-2 text-primary-600"></i>
+                  Password
+                </label>
+                <a
+                  href="#"
+                  class="text-xs text-primary-600 hover:text-primary-800 font-medium"
+                  id="forgot-password"
+                >
+                  Forgot password?
+                </a>
+              </div>
+              <div class="relative">
+                <input
+                  type="password"
+                  name="password"
+                  id="password-input"
+                  required
+                  placeholder="Enter your password"
+                  class="w-full pl-12 pr-12 py-3 rounded-xl border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-200 smooth-transition"
+                  autocomplete="current-password"
+                />
+                <div
+                  class="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400"
+                >
+                  <i class="fa-solid fa-lock"></i>
+                </div>
+                <button
+                  type="button"
+                  id="toggle-password"
+                  class="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 smooth-transition"
+                >
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+              </div>
+              <div class="mt-2 flex items-center text-xs text-slate-500">
+                <i class="fa-solid fa-info-circle mr-1"></i>
+                <span
+                  >Default: admin/admin123 • teacher/teacher123 •
+                  student/student123</span
+                >
+              </div>
+            </div>
+
+            <!-- Remember me -->
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                name="remember"
+                id="remember"
+                class="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+              />
+              <label for="remember" class="ml-2 text-sm text-slate-600">
+                Remember me on this device
+              </label>
+            </div>
+
+            <!-- Submit button -->
+            <button
+              type="submit"
+              class="w-full py-4 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold hover:shadow-xl smooth-transition flex items-center justify-center group shadow-lg"
+              id="login-button"
+            >
+              <span>Sign In</span>
+              <i
+                class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 smooth-transition"
+              ></i>
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="my-8 flex items-center">
+            <div class="flex-1 h-px bg-slate-200"></div>
+            <span class="px-4 text-sm text-slate-500">or continue with</span>
+            <div class="flex-1 h-px bg-slate-200"></div>
+          </div>
+
+          <!-- Social login (placeholder) -->
+          <div class="grid grid-cols-2 gap-3 mb-8">
+            <button
+              type="button"
+              class="py-3 rounded-xl border border-slate-300 hover:bg-slate-50 smooth-transition flex items-center justify-center gap-2"
+              onclick="alert('Google login coming soon!')"
+            >
+              <i class="fa-brands fa-google text-red-500"></i>
+              <span class="text-sm font-medium">Google</span>
+            </button>
+            <button
+              type="button"
+              class="py-3 rounded-xl border border-slate-300 hover:bg-slate-50 smooth-transition flex items-center justify-center gap-2"
+              onclick="alert('Microsoft login coming soon!')"
+            >
+              <i class="fa-brands fa-microsoft text-blue-500"></i>
+              <span class="text-sm font-medium">Microsoft</span>
+            </button>
+          </div>
+
+          <!-- Footer links -->
+          <div class="text-center space-y-4">
+            <p class="text-sm text-slate-600">
+              Don't have an account?
+              <a
+                href="#"
+                class="text-primary-600 hover:text-primary-800 font-medium ml-1"
+              >
+                Contact administrator
+              </a>
+            </p>
+            <div class="pt-4 border-t border-slate-200">
+              <a
+                href="/"
+                class="text-sm text-slate-500 hover:text-slate-700 smooth-transition inline-flex items-center"
+              >
+                <i class="fa-solid fa-arrow-left mr-2"></i>
+                Back to homepage
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security badge -->
+    <div
+      class="absolute bottom-4 right-4 flex items-center gap-2 text-xs text-slate-500"
+    >
+      <i class="fa-solid fa-shield-check text-green-500"></i>
+      <span>Secure HTTPS connection • Encrypted credentials</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // Create background particles
+      function createParticles() {
+        const container = document.getElementById("particles");
+        const particleCount = 15;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+
+          // Random properties
+          const size = Math.random() * 40 + 10;
+          const posX = Math.random() * 100;
+          const posY = Math.random() * 100;
+          const delay = Math.random() * 15;
+          const duration = Math.random() * 10 + 10;
+
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.left = `${posX}%`;
+          particle.style.top = `${posY}%`;
+          particle.style.opacity = Math.random() * 0.2 + 0.05;
+          particle.style.animationDelay = `${delay}s`;
+          particle.style.animationDuration = `${duration}s`;
+
+          container.appendChild(particle);
+        }
+      }
+
+      // Toggle password visibility
+      const togglePassword = document.getElementById("toggle-password");
+      const passwordInput = document.getElementById("password-input");
+
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function () {
+          const type =
+            passwordInput.getAttribute("type") === "password"
+              ? "text"
+              : "password";
+          passwordInput.setAttribute("type", type);
+
+          // Toggle eye icon
+          const icon = this.querySelector("i");
+          if (type === "text") {
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+          } else {
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+          }
+        });
+      }
+
+      // Role selection styling
+      const roleOptions = document.querySelectorAll(".role-option");
+      roleOptions.forEach((option) => {
+        const input = option.querySelector("input");
+        const content = option.querySelector(".role-option-content");
+
+        // Set teacher as default checked
+        if (input.value === "teacher") {
+          input.checked = true;
+          content.classList.add("role-option-selected");
+        }
+
+        input.addEventListener("change", function () {
+          // Remove selected class from all
+          roleOptions.forEach((opt) => {
+            opt
+              .querySelector(".role-option-content")
+              .classList.remove("role-option-selected");
+          });
+
+          // Add to selected
+          if (this.checked) {
+            content.classList.add("role-option-selected");
+          }
+        });
+
+        // Click on entire option
+        content.addEventListener("click", function () {
+          input.checked = true;
+          input.dispatchEvent(new Event("change"));
+        });
+      });
+
+      // Form submission loading state
+      const loginForm = document.querySelector("form");
+      const loginButton = document.getElementById("login-button");
+
+      if (loginForm && loginButton) {
+        loginForm.addEventListener("submit", function (e) {
+          // Basic validation
+          const username = this.querySelector('[name="username"]').value.trim();
+          const password = this.querySelector('[name="password"]').value.trim();
+          const role = this.querySelector('[name="role"]:checked')?.value;
+
+          if (!username || !password || !role) {
+            e.preventDefault();
+            return;
+          }
+
+          // Show loading state
+          loginButton.disabled = true;
+          loginButton.innerHTML = `
+          <i class="fa-solid fa-spinner animate-spin mr-2"></i>
+          <span>Signing in...</span>
+        `;
+
+          // Simulate network delay for better UX
+          setTimeout(() => {
+            if (loginButton.disabled) {
+              loginButton.innerHTML = `
+              <span>Sign In</span>
+              <i class="fa-solid fa-arrow-right ml-2"></i>
+            `;
+              loginButton.disabled = false;
+            }
+          }, 3000);
+        });
+      }
+
+      // Forgot password handler
+      const forgotPassword = document.getElementById("forgot-password");
+      if (forgotPassword) {
+        forgotPassword.addEventListener("click", function (e) {
+          e.preventDefault();
+          alert(
+            "Please contact your system administrator to reset your password.\n\nEmail: admin@sparkai.edu\nPhone: +1 (555) 123-4567",
+          );
+        });
+      }
+
+      // Auto-focus username field
+      document.addEventListener("DOMContentLoaded", function () {
+        createParticles();
+
+        // Focus username field
+        const usernameField = document.querySelector('[name="username"]');
+        if (usernameField) {
+          setTimeout(() => {
+            usernameField.focus();
+          }, 300);
+        }
+
+        // Add enter key support for form submission
+        document.addEventListener("keypress", function (e) {
+          if (e.key === "Enter" && e.target.type !== "textarea") {
+            const form = e.target.closest("form");
+            if (form) {
+              const submitButton = form.querySelector('button[type="submit"]');
+              if (submitButton) {
+                submitButton.click();
+              }
+            }
+          }
+        });
+      });
+    </script>
+
+    <!-- CSS for role selection -->
+    <style>
+      .role-option-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: white;
+        color: #64748b;
+      }
+
+      .role-option-content:hover {
+        border-color: #93c5fd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .role-option-selected {
+        border-color: #3b82f6 !important;
+        background: #eff6ff !important;
+        color: #1e40af !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+      }
+
+      .role-option input:focus + .role-option-content {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      /* Password strength indicator */
+      .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 4px;
+        transition: all 0.3s ease;
+      }
+
+      .strength-weak {
+        width: 33%;
+        background: #ef4444;
+      }
+      .strength-medium {
+        width: 66%;
+        background: #f59e0b;
+      }
+      .strength-strong {
+        width: 100%;
+        background: #22c55e;
+      }
+    </style>
+  </body>
+</html>

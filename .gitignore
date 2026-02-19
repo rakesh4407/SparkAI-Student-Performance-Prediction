@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+database/*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Flask
+instance/
+.webassets-cache
+.env
+.flaskenv
+
+# ML Models (optional - you can include these if they're small)
+# ml_model/*.joblib
+
+# Logs
+*.log
+logs/
+
+# Uploads
+uploads/
+
+# Project specific
+*.sqlpro
+*.sqlite-shm
+*.sqlite-wal

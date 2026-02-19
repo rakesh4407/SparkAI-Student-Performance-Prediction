@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}SparkAI • Student Performance System{% endblock %}
+    </title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                300: "#93c5fd",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+              },
+              success: "#10b981",
+              warning: "#f59e0b",
+              danger: "#ef4444",
+              slate: {
+                50: "#f8fafc",
+                900: "#0f172a",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+            },
+            animation: {
+              "fade-in": "fadeIn 0.3s ease-out",
+              "slide-in": "slideIn 0.3s ease-out",
+              "pulse-subtle": "pulseSubtle 2s ease-in-out infinite",
+            },
+            keyframes: {
+              fadeIn: {
+                "0%": { opacity: "0" },
+                "100%": { opacity: "1" },
+              },
+              slideIn: {
+                "0%": { transform: "translateX(-10px)", opacity: "0" },
+                "100%": { transform: "translateX(0)", opacity: "1" },
+              },
+              pulseSubtle: {
+                "0%, 100%": { opacity: "1" },
+                "50%": { opacity: "0.8" },
+              },
+            },
+          },
+        },
+        darkMode: "class",
+      };
+    </script>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/a2e0e6ad65.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>"
+    />
+
+    <style>
+      :root {
+        --sidebar-width: 16rem;
+        --header-height: 4rem;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+
+      /* Selection */
+      ::selection {
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #1e40af;
+      }
+
+      /* Smooth transitions */
+      .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 200ms;
+      }
+
+      /* Loading skeleton */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #f0f0f0 25%,
+          #e0e0e0 50%,
+          #f0f0f0 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      /* Print styles */
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+      }
+    </style>
+
+    {% block head_extra %}{% endblock %}
+  </head>
+  <body class="bg-slate-50 text-slate-900 min-h-screen overflow-x-hidden">
+    <!-- Loading overlay -->
+    <div
+      id="loading-overlay"
+      class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex items-center justify-center hidden"
+    >
+      <div class="text-center">
+        <div
+          class="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+        ></div>
+        <p class="text-slate-600 font-medium">Loading...</p>
+      </div>
+    </div>
+
+    <div class="flex min-h-screen">
+      <!-- Mobile sidebar backdrop -->
+      <div
+        id="sidebar-backdrop"
+        class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden"
+        onclick="toggleSidebar()"
+      ></div>
+
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out no-print"
+      >
+        <div class="h-full flex flex-col">
+          <!-- Sidebar header -->
+          <div class="p-6 border-b border-slate-200">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+              </div>
+              <div>
+                <h1 class="font-bold text-slate-900 text-lg">SparkAI</h1>
+                <p class="text-xs text-slate-500 font-medium">
+                  Intelligence Hub
+                </p>
+              </div>
+            </div>
+
+            <!-- User info -->
+            <div class="mt-6 p-3 bg-slate-50 rounded-lg">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center"
+                >
+                  <span class="text-primary-700 font-semibold text-sm">
+                    {{ session.username[0].upper() if session.username else 'U'
+                    }}
+                  </span>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-semibold text-slate-900 truncate">
+                    {{ session.username if session.username else 'User' }}
+                  </p>
+                  <p class="text-xs text-slate-500 capitalize">
+                    {{ session.role if session.role else 'Guest' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Navigation -->
+          <nav class="flex-1 p-4 overflow-y-auto">
+            <div class="space-y-1">
+              <!-- Dashboard links based on role -->
+              {% if session.role == 'admin' %}
+              <a
+                href="/admin-dashboard"
+                class="nav-item {% if request.path == '/admin-dashboard' %}nav-item-active{% endif %}"
+              >
+                <i class="fa-solid fa-shield-halved text-primary-600"></i>
+                <span>Admin Dashboard</span>
+                <span class="nav-badge">Admin</span>
+              </a>
+              {% endif %} {% if session.role == 'teacher' %}
+              <a
+                href="/teacher-dashboard"
+                class="nav-item {% if request.path == '/teacher-dashboard' %}nav-item-active{% endif %}"
+              >
+                <i class="fa-solid fa-chart-line text-primary-600"></i>
+                <span>Teacher Dashboard</span>
+              </a>
+              <a
+                href="/prediction-history"
+                class="nav-item {% if request.path == '/prediction-history' %}nav-item-active{% endif %}"
+              >
+                <i class="fa-solid fa-history text-primary-600"></i>
+                <span>Prediction History</span>
+              </a>
+              {% endif %} {% if session.role == 'student' %}
+              <a
+                href="/student-dashboard"
+                class="nav-item {% if request.path == '/student-dashboard' %}nav-item-active{% endif %}"
+              >
+                <i class="fa-solid fa-user-graduate text-primary-600"></i>
+                <span>My Dashboard</span>
+              </a>
+              <a
+                href="/student-history"
+                class="nav-item {% if request.path == '/student-history' %}nav-item-active{% endif %}"
+              >
+                <i class="fa-solid fa-clock-rotate-left text-primary-600"></i>
+                <span>My History</span>
+              </a>
+              {% endif %}
+
+              <!-- Common links -->
+              <div class="pt-4 mt-4 border-t border-slate-200">
+                <p
+                  class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2"
+                >
+                  AI Tools
+                </p>
+                <a
+                  href="/chatbot"
+                  class="nav-item {% if request.path == '/chatbot' %}nav-item-active{% endif %}"
+                >
+                  <i class="fa-solid fa-robot text-emerald-600"></i>
+                  <span>AI Assistant</span>
+                  <span
+                    class="animate-pulse-subtle bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full text-xs font-medium"
+                    >Live</span
+                  >
+                </a>
+                <a
+                  href="/predict"
+                  class="nav-item {% if request.path == '/predict' %}nav-item-active{% endif %}"
+                >
+                  <i class="fa-solid fa-brain text-violet-600"></i>
+                  <span>Performance Predictor</span>
+                </a>
+              </div>
+
+              <!-- System -->
+              <div class="pt-4 mt-4 border-t border-slate-200">
+                <p
+                  class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2"
+                >
+                  System
+                </p>
+                <a
+                  href="/"
+                  class="nav-item {% if request.path == '/' %}nav-item-active{% endif %}"
+                >
+                  <i class="fa-solid fa-house text-slate-600"></i>
+                  <span>Home</span>
+                </a>
+                {% if session.role %}
+                <a
+                  href="/logout"
+                  class="nav-item text-danger hover:bg-red-50 hover:text-red-700"
+                >
+                  <i class="fa-solid fa-right-from-bracket"></i>
+                  <span>Logout</span>
+                </a>
+                {% else %}
+                <a href="/login" class="nav-item">
+                  <i class="fa-solid fa-right-to-bracket text-primary-600"></i>
+                  <span>Login</span>
+                </a>
+                {% endif %}
+              </div>
+            </div>
+          </nav>
+
+          <!-- Sidebar footer -->
+          <div class="p-4 border-t border-slate-200">
+            <div class="text-center">
+              <p class="text-xs text-slate-500 mb-1">
+                {% if session.role %}
+                <span class="font-semibold">Logged in as:</span> {{
+                session.role|capitalize }} {% else %} Not logged in {% endif %}
+              </p>
+              <div
+                class="flex items-center justify-center gap-2 text-xs text-slate-400"
+              >
+                <i class="fa-solid fa-server"></i>
+                <span>System Status: </span>
+                <span
+                  class="w-2 h-2 rounded-full bg-success animate-pulse"
+                ></span>
+                <span class="text-success font-medium">Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <div class="flex-1 flex flex-col min-h-screen">
+        <!-- Header -->
+        <header
+          class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 no-print"
+        >
+          <div class="flex items-center justify-between px-6 py-4">
+            <!-- Left: Mobile menu button and breadcrumb -->
+            <div class="flex items-center gap-4">
+              <button
+                onclick="toggleSidebar()"
+                class="lg:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+              >
+                <i class="fa-solid fa-bars text-lg"></i>
+              </button>
+
+              <div class="hidden md:block">
+                <nav class="flex items-center space-x-2 text-sm text-slate-600">
+                  <a href="/" class="hover:text-primary-600">Home</a>
+                  <i
+                    class="fa-solid fa-chevron-right text-xs text-slate-400"
+                  ></i>
+                  <span class="text-slate-900 font-medium"
+                    >{% block breadcrumb %}{% endblock %}</span
+                  >
+                </nav>
+              </div>
+            </div>
+
+            <!-- Right: User menu and notifications -->
+            <div class="flex items-center gap-4">
+              <!-- Notifications -->
+              <div class="relative">
+                <button
+                  onclick="toggleNotifications()"
+                  class="p-2 rounded-lg hover:bg-slate-100 text-slate-600 relative"
+                >
+                  <i class="fa-regular fa-bell text-lg"></i>
+                  <span
+                    class="absolute -top-1 -right-1 w-5 h-5 bg-danger text-white text-xs rounded-full flex items-center justify-center"
+                    >3</span
+                  >
+                </button>
+
+                <!-- Notifications dropdown -->
+                <div
+                  id="notifications-dropdown"
+                  class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-200 hidden z-40"
+                >
+                  <div class="p-4 border-b border-slate-200">
+                    <div class="flex justify-between items-center">
+                      <h3 class="font-semibold text-slate-900">
+                        Notifications
+                      </h3>
+                      <button
+                        class="text-xs text-primary-600 hover:text-primary-800"
+                      >
+                        Mark all as read
+                      </button>
+                    </div>
+                  </div>
+                  <div class="max-h-96 overflow-y-auto">
+                    <!-- Notification items would go here -->
+                    <div
+                      class="p-4 border-b border-slate-100 hover:bg-slate-50"
+                    >
+                      <p class="text-sm font-medium text-slate-900">
+                        New prediction available
+                      </p>
+                      <p class="text-xs text-slate-500 mt-1">
+                        AI has updated performance predictions
+                      </p>
+                      <p class="text-xs text-slate-400 mt-2">2 hours ago</p>
+                    </div>
+                  </div>
+                  <div class="p-4 border-t border-slate-200">
+                    <a
+                      href="#"
+                      class="text-sm text-primary-600 hover:text-primary-800 font-medium text-center block"
+                    >
+                      View all notifications
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- User dropdown -->
+              <div class="relative">
+                <button
+                  onclick="toggleUserMenu()"
+                  class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-100"
+                >
+                  <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center"
+                  >
+                    <span class="text-white font-semibold text-sm">
+                      {{ session.username[0].upper() if session.username else
+                      'U' }}
+                    </span>
+                  </div>
+                  <div class="hidden md:block text-left">
+                    <p class="text-sm font-semibold text-slate-900">
+                      {{ session.username if session.username else 'User' }}
+                    </p>
+                    <p class="text-xs text-slate-500 capitalize">
+                      {{ session.role if session.role else 'Guest' }}
+                    </p>
+                  </div>
+                  <i
+                    class="fa-solid fa-chevron-down text-xs text-slate-500"
+                  ></i>
+                </button>
+
+                <!-- User menu dropdown -->
+                <div
+                  id="user-menu"
+                  class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 hidden z-40"
+                >
+                  <div class="p-4 border-b border-slate-200">
+                    <p class="text-sm font-semibold text-slate-900">
+                      {{ session.username if session.username else 'User' }}
+                    </p>
+                    <p class="text-xs text-slate-500">
+                      {{ session.role|capitalize if session.role else 'Guest' }}
+                    </p>
+                  </div>
+                  <div class="p-2">
+                    <a
+                      href="/profile"
+                      class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 text-sm"
+                    >
+                      <i class="fa-regular fa-user text-slate-600 w-5"></i>
+                      <span>My Profile</span>
+                    </a>
+                    <a
+                      href="/settings"
+                      class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 text-sm"
+                    >
+                      <i class="fa-solid fa-gear text-slate-600 w-5"></i>
+                      <span>Settings</span>
+                    </a>
+                    <a
+                      href="/help"
+                      class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-100 text-sm"
+                    >
+                      <i
+                        class="fa-regular fa-circle-question text-slate-600 w-5"
+                      ></i>
+                      <span>Help & Support</span>
+                    </a>
+                  </div>
+                  <div class="p-2 border-t border-slate-200">
+                    <a
+                      href="/logout"
+                      class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 text-sm font-medium"
+                    >
+                      <i class="fa-solid fa-right-from-bracket w-5"></i>
+                      <span>Logout</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="flex-1 p-4 md:p-8 overflow-y-auto">
+          <!-- Flash messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %} {% if
+          messages %}
+          <div class="mb-6 space-y-3">
+            {% for category, message in messages %}
+            <div
+              class="flash-message flash-{{ category }} p-4 rounded-xl border animate-fade-in"
+            >
+              <div class="flex items-center gap-3">
+                <i
+                  class="fa-solid {% if category == 'success' %}fa-circle-check text-success {% elif category == 'error' %}fa-circle-exclamation text-danger {% elif category == 'warning' %}fa-triangle-exclamation text-warning {% else %}fa-circle-info text-primary-600{% endif %}"
+                ></i>
+                <p class="flex-1">{{ message }}</p>
+                <button
+                  onclick="this.parentElement.parentElement.remove()"
+                  class="text-slate-400 hover:text-slate-600"
+                >
+                  <i class="fa-solid fa-times"></i>
+                </button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %} {% endwith %}
+
+          <!-- Page header -->
+          <div class="mb-6 md:mb-8">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2">
+              {% block page_title %}{% endblock %}
+            </h1>
+            <p class="text-slate-600">
+              {% block page_subtitle %}{% endblock %}
+            </p>
+          </div>
+
+          <!-- Content block -->
+          <div class="animate-fade-in">{% block content %}{% endblock %}</div>
+        </main>
+
+        <!-- Footer -->
+        <footer
+          class="mt-auto border-t border-slate-200 bg-white py-6 px-8 no-print"
+        >
+          <div
+            class="flex flex-col md:flex-row justify-between items-center gap-4"
+          >
+            <div class="text-center md:text-left">
+              <div
+                class="flex items-center gap-2 justify-center md:justify-start mb-2"
+              >
+                <div
+                  class="w-6 h-6 rounded-md bg-primary-600 flex items-center justify-center"
+                >
+                  <i class="fa-solid fa-graduation-cap text-white text-xs"></i>
+                </div>
+                <span class="font-bold text-slate-900">SparkAI</span>
+              </div>
+              <p class="text-sm text-slate-500">
+                AI-Powered Student Performance System
+              </p>
+            </div>
+
+            <div class="flex items-center gap-6 text-sm text-slate-600">
+              <a href="/privacy" class="hover:text-primary-600">Privacy</a>
+              <a href="/terms" class="hover:text-primary-600">Terms</a>
+              <a href="/contact" class="hover:text-primary-600">Contact</a>
+              <span class="text-xs text-slate-400">v2.1.0</span>
+            </div>
+          </div>
+          <div class="mt-4 text-center text-xs text-slate-400">
+            © 2024 Student Intelligence AI. All rights reserved.
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // Toggle sidebar on mobile
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const backdrop = document.getElementById("sidebar-backdrop");
+        sidebar.classList.toggle("-translate-x-full");
+        backdrop.classList.toggle("hidden");
+      }
+
+      // Toggle notifications dropdown
+      function toggleNotifications() {
+        const dropdown = document.getElementById("notifications-dropdown");
+        dropdown.classList.toggle("hidden");
+
+        // Close user menu if open
+        document.getElementById("user-menu").classList.add("hidden");
+      }
+
+      // Toggle user menu dropdown
+      function toggleUserMenu() {
+        const dropdown = document.getElementById("user-menu");
+        dropdown.classList.toggle("hidden");
+
+        // Close notifications if open
+        document
+          .getElementById("notifications-dropdown")
+          .classList.add("hidden");
+      }
+
+      // Close dropdowns when clicking outside
+      document.addEventListener("click", function (event) {
+        const notifications = document.getElementById("notifications-dropdown");
+        const userMenu = document.getElementById("user-menu");
+
+        if (
+          !event.target.closest("#notifications-dropdown") &&
+          !event.target.closest('button[onclick*="toggleNotifications"]')
+        ) {
+          notifications.classList.add("hidden");
+        }
+
+        if (
+          !event.target.closest("#user-menu") &&
+          !event.target.closest('button[onclick*="toggleUserMenu"]')
+        ) {
+          userMenu.classList.add("hidden");
+        }
+      });
+
+      // Show loading overlay
+      function showLoading() {
+        document.getElementById("loading-overlay").classList.remove("hidden");
+      }
+
+      // Hide loading overlay
+      function hideLoading() {
+        document.getElementById("loading-overlay").classList.add("hidden");
+      }
+
+      // Auto-remove flash messages after 5 seconds
+      setTimeout(() => {
+        document.querySelectorAll(".flash-message").forEach((msg) => {
+          msg.style.opacity = "0";
+          setTimeout(() => msg.remove(), 300);
+        });
+      }, 5000);
+
+      // Print page
+      function printPage() {
+        window.print();
+      }
+
+      // Download as PDF
+      function downloadAsPDF() {
+        showLoading();
+        // PDF generation logic would go here
+        setTimeout(hideLoading, 1500);
+      }
+
+      // Initialize tooltips
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add any initialization code here
+        console.log("SparkAI System Initialized");
+      });
+    </script>
+
+    <!-- Additional CSS for components -->
+    <style>
+      /* Navigation item styles */
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        color: #475569;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        margin-bottom: 0.25rem;
+      }
+
+      .nav-item:hover {
+        background-color: #f1f5f9;
+        color: #1e40af;
+        transform: translateX(4px);
+      }
+
+      .nav-item-active {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border-left: 3px solid #3b82f6;
+      }
+
+      .nav-badge {
+        margin-left: auto;
+        background-color: #dbeafe;
+        color: #1e40af;
+        padding: 0.125rem 0.5rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+      }
+
+      /* Flash message styles */
+      .flash-success {
+        background-color: #d1fae5;
+        border-color: #a7f3d0;
+        color: #065f46;
+      }
+
+      .flash-error {
+        background-color: #fee2e2;
+        border-color: #fecaca;
+        color: #991b1b;
+      }
+
+      .flash-warning {
+        background-color: #fef3c7;
+        border-color: #fde68a;
+        color: #92400e;
+      }
+
+      .flash-info {
+        background-color: #dbeafe;
+        border-color: #bfdbfe;
+        color: #1e40af;
+      }
+
+      /* Responsive improvements */
+      @media (max-width: 768px) {
+        :root {
+          --sidebar-width: 100%;
+        }
+
+        .nav-item {
+          padding: 1rem;
+        }
+      }
+
+      /* Print optimizations */
+      @media print {
+        body {
+          background: white !important;
+          color: black !important;
+        }
+
+        .no-print {
+          display: none !important;
+        }
+
+        a {
+          color: black !important;
+          text-decoration: none !important;
+        }
+      }
+    </style>
+
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
