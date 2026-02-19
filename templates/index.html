@@ -1,0 +1,1301 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      SparkAI • AI-Powered Student Performance Intelligence Platform
+    </title>
+    <meta
+      name="description"
+      content="Predict academic performance, detect at-risk students, and get personalized recommendations with AI-driven insights"
+    />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                300: "#93c5fd",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+              },
+              secondary: {
+                50: "#f5f3ff",
+                100: "#ede9fe",
+                200: "#ddd6fe",
+                300: "#c4b5fd",
+                400: "#a78bfa",
+                500: "#8b5cf6",
+                600: "#7c3aed",
+                700: "#6d28d9",
+                800: "#5b21b6",
+                900: "#4c1d95",
+              },
+              accent: {
+                500: "#22c55e",
+                600: "#16a34a",
+              },
+            },
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+            animation: {
+              float: "float 6s ease-in-out infinite",
+              "pulse-slow": "pulse 3s ease-in-out infinite",
+              "slide-up": "slideUp 0.5s ease-out",
+              "fade-in": "fadeIn 0.8s ease-out",
+              "bounce-slow": "bounce 2s infinite",
+              shimmer: "shimmer 2s infinite linear",
+              "spin-slow": "spin 8s linear infinite",
+              "ping-slow": "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+              "gradient-xy": "gradientXY 15s ease infinite",
+            },
+            keyframes: {
+              float: {
+                "0%, 100%": { transform: "translateY(0px)" },
+                "50%": { transform: "translateY(-20px)" },
+              },
+              slideUp: {
+                from: { transform: "translateY(20px)", opacity: 0 },
+                to: { transform: "translateY(0)", opacity: 1 },
+              },
+              fadeIn: {
+                from: { opacity: 0 },
+                to: { opacity: 1 },
+              },
+              shimmer: {
+                "0%": { backgroundPosition: "-200px 0" },
+                "100%": { backgroundPosition: "200px 0" },
+              },
+              gradientXY: {
+                "0%, 100%": {
+                  "background-size": "400% 400%",
+                  "background-position": "left center",
+                },
+                "50%": {
+                  "background-size": "200% 200%",
+                  "background-position": "right center",
+                },
+              },
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <script
+      src="https://kit.fontawesome.com/a2e0e6ad65.js"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- AOS (Animate on Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- CountUp.js for statistics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.js"></script>
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>"
+    />
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+        border-radius: 5px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(to bottom, #2563eb, #7c3aed);
+      }
+
+      /* Glass morphism */
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      }
+
+      .glass-dark {
+        background: rgba(17, 24, 39, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      /* Gradient text */
+      .gradient-text {
+        background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        background-size: 200% 200%;
+        animation: gradientXY 8s ease infinite;
+      }
+
+      /* Shimmer effect */
+      .shimmer-bg {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0) 0%,
+          rgba(255, 255, 255, 0.3) 50%,
+          rgba(255, 255, 255, 0) 100%
+        );
+        background-size: 200% 100%;
+      }
+
+      /* Floating animation for elements */
+      .float-element {
+        animation: float 6s ease-in-out infinite;
+      }
+
+      /* Particle background */
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .particle {
+        position: absolute;
+        background: rgba(59, 130, 246, 0.1);
+        border-radius: 50%;
+        animation: float 15s infinite linear;
+      }
+
+      /* Smooth transitions */
+      .smooth-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Feature cards */
+      .feature-card {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.6s;
+      }
+
+      .feature-card:hover::before {
+        left: 100%;
+      }
+
+      /* Counter animation */
+      .counter-number {
+        font-feature-settings: "tnum";
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* Responsive typography */
+      @media (max-width: 768px) {
+        .hero-text {
+          font-size: 2.5rem !important;
+          line-height: 1.2 !important;
+        }
+      }
+
+      /* Gradient orb */
+      .gradient-orb {
+        background: radial-gradient(
+          circle at center,
+          #3b82f6 0%,
+          #8b5cf6 50%,
+          transparent 100%
+        );
+        filter: blur(60px);
+        opacity: 0.15;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 text-slate-800"
+  >
+    <!-- Animated background particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Gradient Orbs -->
+    <div
+      class="gradient-orb fixed top-20 -left-20 w-96 h-96 rounded-full pointer-events-none"
+    ></div>
+    <div
+      class="gradient-orb fixed bottom-20 -right-20 w-96 h-96 rounded-full pointer-events-none"
+    ></div>
+
+    <!-- Navigation -->
+    <header class="sticky top-0 z-50 glass border-b border-slate-200/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex justify-between items-center">
+          <!-- Logo -->
+          <div class="flex items-center space-x-3">
+            <a href="/" class="flex items-center space-x-3 group">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center group-hover:scale-110 smooth-transition"
+              >
+                <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+              </div>
+              <div>
+                <span class="font-bold text-xl text-slate-900">SparkAI</span>
+                <div class="text-xs text-primary-600 font-medium">
+                  Intelligence Platform
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <nav class="hidden md:flex items-center space-x-8">
+            <a
+              href="#features"
+              class="text-slate-700 hover:text-primary-600 font-medium smooth-transition"
+              >Features</a
+            >
+            <a
+              href="#how-it-works"
+              class="text-slate-700 hover:text-primary-600 font-medium smooth-transition"
+              >How It Works</a
+            >
+            <a
+              href="#demo"
+              class="text-slate-700 hover:text-primary-600 font-medium smooth-transition"
+              >Live Demo</a
+            >
+            <a
+              href="#stats"
+              class="text-slate-700 hover:text-primary-600 font-medium smooth-transition"
+              >Impact</a
+            >
+            <a
+              href="#testimonials"
+              class="text-slate-700 hover:text-primary-600 font-medium smooth-transition"
+              >Testimonials</a
+            >
+          </nav>
+
+          <!-- CTA Buttons -->
+          <div class="flex items-center space-x-4">
+            <a
+              href="/login"
+              class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-medium hover:shadow-lg smooth-transition shadow-md hover:shadow-xl flex items-center gap-2"
+            >
+              <i class="fa-solid fa-right-to-bracket"></i>
+              <span>Login</span>
+            </a>
+
+            <!-- Mobile menu button -->
+            <button
+              id="mobile-menu-button"
+              class="md:hidden p-2 rounded-lg hover:bg-slate-100"
+            >
+              <i class="fa-solid fa-bars text-xl text-slate-700"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div
+          id="mobile-menu"
+          class="hidden md:hidden mt-4 pb-4 border-t border-slate-200 pt-4"
+        >
+          <div class="flex flex-col space-y-3">
+            <a
+              href="#features"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+              >Features</a
+            >
+            <a
+              href="#how-it-works"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+              >How It Works</a
+            >
+            <a
+              href="#demo"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+              >Live Demo</a
+            >
+            <a
+              href="#stats"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+              >Impact</a
+            >
+            <a
+              href="#testimonials"
+              class="text-slate-700 hover:text-primary-600 font-medium py-2 smooth-transition"
+              >Testimonials</a
+            >
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden">
+      <div
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-20 pb-16 md:pb-24"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <!-- Left Content -->
+          <div
+            class="relative z-10"
+            data-aos="fade-right"
+            data-aos-duration="800"
+          >
+            <div
+              class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-100 to-purple-100 text-primary-700 font-medium mb-6 animate-pulse-slow"
+            >
+              <i class="fa-solid fa-bolt mr-2 text-primary-600"></i>
+              AI-Powered Academic Intelligence
+            </div>
+
+            <h1
+              class="hero-text text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight"
+            >
+              Transform Student
+              <span class="gradient-text block">Performance with</span>
+              <span class="gradient-text">AI Insights</span>
+            </h1>
+
+            <p class="text-lg text-slate-600 mt-6 mb-8 max-w-2xl">
+              SparkAI predicts academic performance, detects at‑risk students
+              early, and provides personalized recommendations using advanced
+              Machine Learning algorithms.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a
+                href="/login"
+                class="px-8 py-4 rounded-xl bg-gradient-to-r from-primary-600 to-secondary-600 text-white font-semibold hover:shadow-xl smooth-transition flex items-center justify-center group shadow-lg"
+              >
+                <span>Get Started Free</span>
+                <i
+                  class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 smooth-transition"
+                ></i>
+              </a>
+              <a
+                href="#demo"
+                class="px-8 py-4 rounded-xl border-2 border-primary-600 text-primary-600 font-semibold hover:bg-primary-50 smooth-transition flex items-center justify-center"
+              >
+                <i class="fa-solid fa-play-circle mr-2"></i>
+                <span>Watch Demo</span>
+              </a>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="mt-10 flex flex-wrap items-center gap-6">
+              <div class="flex items-center">
+                <div class="flex -space-x-2">
+                  <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 border-2 border-white"
+                  ></div>
+                  <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-teal-500 border-2 border-white"
+                  ></div>
+                  <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 border-2 border-white"
+                  ></div>
+                </div>
+                <span class="ml-3 text-sm text-slate-600"
+                  >Trusted by 500+ educators</span
+                >
+              </div>
+              <div class="flex items-center">
+                <i class="fa-solid fa-shield-check text-green-500 text-xl"></i>
+                <span class="ml-2 text-sm text-slate-600"
+                  >Secure & Private</span
+                >
+              </div>
+              <div class="flex items-center">
+                <i class="fa-solid fa-chart-line text-primary-500 text-xl"></i>
+                <span class="ml-2 text-sm text-slate-600"
+                  >95% Prediction Accuracy</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Content - Interactive Demo Card -->
+          <div
+            class="relative"
+            data-aos="fade-left"
+            data-aos-duration="800"
+            data-aos-delay="200"
+          >
+            <div
+              class="relative glass rounded-3xl p-8 shadow-2xl hover:shadow-3xl smooth-transition transform hover:-translate-y-2"
+            >
+              <!-- Floating elements -->
+              <div
+                class="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full opacity-20 animate-float"
+              ></div>
+              <div
+                class="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full opacity-20 animate-float"
+                style="animation-delay: 2s"
+              ></div>
+              <div
+                class="absolute top-1/2 -right-8 w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full opacity-20 animate-float"
+                style="animation-delay: 1s"
+              ></div>
+
+              <!-- Demo content -->
+              <div class="relative z-10">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-bold text-slate-900">
+                    Live AI Insight Demo
+                  </h3>
+                  <div class="flex items-center space-x-1">
+                    <span
+                      class="w-2 h-2 bg-green-500 rounded-full animate-ping-slow"
+                    ></span>
+                    <span class="text-xs text-green-600 font-medium">Live</span>
+                  </div>
+                </div>
+
+                <!-- Student profile -->
+                <div class="mb-6 p-4 bg-slate-50 rounded-xl">
+                  <div class="flex items-center space-x-3">
+                    <div
+                      class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center"
+                    >
+                      <span class="text-white font-bold">JD</span>
+                    </div>
+                    <div>
+                      <h4 class="font-semibold text-slate-900">John Doe</h4>
+                      <p class="text-sm text-slate-500">
+                        Computer Science • Semester 4
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Metrics grid - UPDATED to show internal_score instead of CGPA -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                  <div class="p-3 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-slate-500">Attendance</p>
+                    <p class="text-lg font-bold text-blue-600">78%</p>
+                  </div>
+                  <div class="p-3 bg-purple-50 rounded-lg">
+                    <p class="text-xs text-slate-500">Internal Score</p>
+                    <p class="text-lg font-bold text-purple-600">24/30</p>
+                  </div>
+                  <div class="p-3 bg-amber-50 rounded-lg">
+                    <p class="text-xs text-slate-500">Study Hours</p>
+                    <p class="text-lg font-bold text-amber-600">2.5/day</p>
+                  </div>
+                  <div class="p-3 bg-emerald-50 rounded-lg">
+                    <p class="text-xs text-slate-500">Assignments</p>
+                    <p class="text-lg font-bold text-emerald-600">8.5/10</p>
+                  </div>
+                </div>
+
+                <!-- AI Prediction with progress bar -->
+                <div
+                  id="ai-prediction"
+                  class="p-5 rounded-xl bg-gradient-to-r from-blue-600 to-secondary-600 text-white smooth-transition"
+                >
+                  <div class="flex items-center justify-between mb-3">
+                    <p class="text-sm font-medium text-white/90">
+                      AI Performance Prediction
+                    </p>
+                    <button
+                      onclick="cyclePrediction()"
+                      class="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full smooth-transition"
+                    >
+                      <i class="fa-solid fa-rotate mr-1"></i>Simulate
+                    </button>
+                  </div>
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-lg font-bold" id="prediction-text"
+                        >Medium Risk</span
+                      >
+                      <span
+                        class="px-2 py-1 rounded-full text-xs font-medium bg-white/20"
+                        id="prediction-badge"
+                        >Monitor</span
+                      >
+                    </div>
+                    <p class="text-sm text-white/80" id="prediction-desc">
+                      Student shows potential but needs consistency improvement
+                      in assignments.
+                    </p>
+                    <div class="mt-3">
+                      <div
+                        class="flex justify-between text-xs text-white/70 mb-1"
+                      >
+                        <span>Improvement Progress</span>
+                        <span id="progress-percentage">65%</span>
+                      </div>
+                      <div class="w-full bg-white/20 rounded-full h-2">
+                        <div
+                          id="progress-bar"
+                          class="bg-white h-2 rounded-full transition-all duration-500"
+                          style="width: 65%"
+                        ></div>
+                      </div>
+                    </div>
+                    <!-- Predicted End-term Score -->
+                    <div
+                      class="mt-3 pt-3 border-t border-white/20 flex justify-between"
+                    >
+                      <span class="text-sm text-white/80"
+                        >Predicted End-term:</span
+                      >
+                      <span class="font-bold">32/40</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="py-16 bg-white/50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+            <div
+              class="text-4xl md:text-5xl font-bold gradient-text counter-number"
+              id="stat1"
+            >
+              500+
+            </div>
+            <p class="text-slate-600 mt-2">Educators Trust Us</p>
+          </div>
+          <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+            <div
+              class="text-4xl md:text-5xl font-bold gradient-text counter-number"
+              id="stat2"
+            >
+              95%
+            </div>
+            <p class="text-slate-600 mt-2">Prediction Accuracy</p>
+          </div>
+          <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+            <div
+              class="text-4xl md:text-5xl font-bold gradient-text counter-number"
+              id="stat3"
+            >
+              10k+
+            </div>
+            <p class="text-slate-600 mt-2">Students Analyzed</p>
+          </div>
+          <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+            <div
+              class="text-4xl md:text-5xl font-bold gradient-text counter-number"
+              id="stat4"
+            >
+              30%
+            </div>
+            <p class="text-slate-600 mt-2">Performance Improvement</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16" data-aos="fade-up">
+          <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            Powerful Features for
+            <span class="gradient-text">Modern Education</span>
+          </h2>
+          <p class="text-lg text-slate-600 max-w-3xl mx-auto">
+            Everything you need to transform student performance analysis with
+            AI
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div
+            class="feature-card group"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <div
+              class="p-8 rounded-3xl bg-gradient-to-br from-blue-50 to-white border border-blue-100 group-hover:border-blue-300 smooth-transition h-full"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 group-hover:scale-110 smooth-transition"
+              >
+                <i class="fa-solid fa-brain text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-4">
+                AI Performance Prediction
+              </h3>
+              <p class="text-slate-600 mb-6">
+                Advanced ML models predict student performance with 95% accuracy
+                using attendance, scores, and study patterns.
+              </p>
+              <div class="flex items-center text-sm text-slate-500 mb-4">
+                <i class="fa-solid fa-chart-line text-primary-500 mr-2"></i>
+                <span>End-term prediction (0-40 marks)</span>
+              </div>
+              <a
+                href="/predict"
+                class="inline-flex items-center text-primary-600 font-medium group-hover:text-primary-800"
+              >
+                Try Predictor
+                <i
+                  class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 smooth-transition"
+                ></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Feature 2 -->
+          <div
+            class="feature-card group"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <div
+              class="p-8 rounded-3xl bg-gradient-to-br from-green-50 to-white border border-green-100 group-hover:border-green-300 smooth-transition h-full"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 smooth-transition"
+              >
+                <i class="fa-solid fa-chart-line text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-4">
+                Smart Dashboards
+              </h3>
+              <p class="text-slate-600 mb-6">
+                Role-based dashboards for teachers, students, and admins with
+                real-time analytics and actionable insights.
+              </p>
+              <div class="flex items-center text-sm text-slate-500 mb-4">
+                <i class="fa-solid fa-table text-green-500 mr-2"></i>
+                <span>Input total: 60 marks (A+M+I)</span>
+              </div>
+              <a
+                href="/login"
+                class="inline-flex items-center text-green-600 font-medium group-hover:text-green-800"
+              >
+                View Dashboards
+                <i
+                  class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 smooth-transition"
+                ></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Feature 3 -->
+          <div
+            class="feature-card group"
+            data-aos="fade-up"
+            data-aos-delay="300"
+          >
+            <div
+              class="p-8 rounded-3xl bg-gradient-to-br from-purple-50 to-white border border-purple-100 group-hover:border-purple-300 smooth-transition h-full"
+            >
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 group-hover:scale-110 smooth-transition"
+              >
+                <i class="fa-solid fa-robot text-white text-2xl"></i>
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-4">
+                AI Guidance Assistant
+              </h3>
+              <p class="text-slate-600 mb-6">
+                24/7 AI chatbot provides personalized study tips, exam
+                strategies, and academic guidance.
+              </p>
+              <div class="flex items-center text-sm text-slate-500 mb-4">
+                <i class="fa-solid fa-message text-purple-500 mr-2"></i>
+                <span>Personalized recommendations</span>
+              </div>
+              <a
+                href="/chatbot"
+                class="inline-flex items-center text-purple-600 font-medium group-hover:text-purple-800"
+              >
+                Chat with AI
+                <i
+                  class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 smooth-transition"
+                ></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section
+      id="how-it-works"
+      class="py-20 bg-gradient-to-br from-slate-50 to-blue-50"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16" data-aos="fade-up">
+          <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
+            How <span class="gradient-text">SparkAI Works</span>
+          </h2>
+          <p class="text-lg text-slate-600 max-w-3xl mx-auto">
+            A simple 4-step process to transform academic performance analysis
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Step 1 -->
+          <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+            <div class="relative mb-6">
+              <div
+                class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mx-auto shadow-lg"
+              >
+                <span class="text-white text-2xl font-bold">1</span>
+              </div>
+              <div
+                class="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full border-4 border-blue-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-database text-blue-500 text-xs"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">
+              Data Collection
+            </h3>
+            <p class="text-slate-600">
+              Gather academic data including attendance, assignments (10),
+              midterm (20), and internal scores (30).
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+            <div class="relative mb-6">
+              <div
+                class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto shadow-lg"
+              >
+                <span class="text-white text-2xl font-bold">2</span>
+              </div>
+              <div
+                class="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full border-4 border-purple-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-brain text-purple-500 text-xs"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">ML Analysis</h3>
+            <p class="text-slate-600">
+              AI algorithms analyze patterns and predict end-term scores (0-40)
+              with high accuracy.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+            <div class="relative mb-6">
+              <div
+                class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto shadow-lg"
+              >
+                <span class="text-white text-2xl font-bold">3</span>
+              </div>
+              <div
+                class="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full border-4 border-amber-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-chart-simple text-amber-500 text-xs"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Risk Analysis</h3>
+            <p class="text-slate-600">
+              Identify at-risk students early with predictive risk scoring based
+              on total score (0-100).
+            </p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="text-center" data-aos="fade-up" data-aos-delay="400">
+            <div class="relative mb-6">
+              <div
+                class="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mx-auto shadow-lg"
+              >
+                <span class="text-white text-2xl font-bold">4</span>
+              </div>
+              <div
+                class="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-full border-4 border-green-100 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-lightbulb text-green-500 text-xs"></i>
+              </div>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">
+              Personalized Guidance
+            </h3>
+            <p class="text-slate-600">
+              Deliver tailored recommendations and interventions for each
+              student based on their scores.
+            </p>
+          </div>
+        </div>
+
+        <!-- Scoring System Summary -->
+        <div class="mt-16 text-center" data-aos="fade-up">
+          <div
+            class="inline-flex flex-wrap items-center justify-center gap-4 p-6 bg-white rounded-2xl shadow-lg"
+          >
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-green-500"></span>
+              <span class="text-sm">Assignments (10)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+              <span class="text-sm">Midterm (20)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+              <span class="text-sm">Internal Score (30)</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+              <span class="text-sm">End-term (40) → Predicted</span>
+            </div>
+            <div class="h-6 border-l border-slate-300 mx-2"></div>
+            <div class="flex items-center gap-2 font-bold">
+              <span class="text-primary-600">Total: 100 marks</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section
+      class="py-20 bg-gradient-to-r from-primary-600 via-secondary-600 to-primary-800 text-white relative overflow-hidden"
+    >
+      <div class="absolute inset-0 bg-black/10"></div>
+      <div
+        class="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"
+      ></div>
+      <div
+        class="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"
+      ></div>
+
+      <div
+        class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10"
+      >
+        <div class="max-w-3xl mx-auto">
+          <h2 class="text-4xl md:text-5xl font-bold mb-6" data-aos="fade-up">
+            Ready to Transform Student Performance?
+          </h2>
+          <p
+            class="text-xl opacity-90 mb-10"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            Join 500+ educators using SparkAI to make data-driven decisions and
+            improve academic outcomes.
+          </p>
+          <div
+            class="flex flex-col sm:flex-row gap-4 justify-center"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <a
+              href="/login"
+              class="px-8 py-4 rounded-xl bg-white text-primary-600 font-bold hover:bg-slate-100 smooth-transition shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+            >
+              Start Free Trial
+            </a>
+            <a
+              href="#demo"
+              class="px-8 py-4 rounded-xl bg-transparent border-2 border-white text-white hover:bg-white/10 smooth-transition transform hover:-translate-y-1"
+            >
+              <i class="fa-solid fa-calendar mr-2"></i>
+              Schedule Demo
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Company info -->
+          <div>
+            <div class="flex items-center space-x-3 mb-4">
+              <div
+                class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-secondary-600 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-graduation-cap text-white"></i>
+              </div>
+              <span class="font-bold text-xl text-white">SparkAI</span>
+            </div>
+            <p class="text-sm opacity-75">
+              AI-powered student performance prediction and recommendation
+              system for modern education.
+            </p>
+            <div class="mt-4 text-sm opacity-75">
+              <p>
+                Assignments(10) + Midterm(20) + Internal(30) + End-term(40) =
+                100
+              </p>
+            </div>
+          </div>
+
+          <!-- Quick links -->
+          <div>
+            <h4 class="text-white font-bold mb-4">Platform</h4>
+            <ul class="space-y-2">
+              <li>
+                <a href="/login" class="hover:text-white smooth-transition"
+                  >Login</a
+                >
+              </li>
+              <li>
+                <a href="/predict" class="hover:text-white smooth-transition"
+                  >AI Predictor</a
+                >
+              </li>
+              <li>
+                <a href="/chatbot" class="hover:text-white smooth-transition"
+                  >AI Assistant</a
+                >
+              </li>
+              <li>
+                <a
+                  href="/teacher-dashboard"
+                  class="hover:text-white smooth-transition"
+                  >Teacher Dashboard</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Resources -->
+          <div>
+            <h4 class="text-white font-bold mb-4">Resources</h4>
+            <ul class="space-y-2">
+              <li>
+                <a href="#" class="hover:text-white smooth-transition"
+                  >Documentation</a
+                >
+              </li>
+              <li>
+                <a href="#" class="hover:text-white smooth-transition"
+                  >API Reference</a
+                >
+              </li>
+              <li>
+                <a href="#" class="hover:text-white smooth-transition"
+                  >Support Center</a
+                >
+              </li>
+              <li>
+                <a href="#" class="hover:text-white smooth-transition">Blog</a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Contact -->
+          <div>
+            <h4 class="text-white font-bold mb-4">Contact</h4>
+            <div class="space-y-3">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-envelope text-primary-400"></i>
+                <a
+                  href="mailto:2401201064@krmu.edu.in"
+                  class="hover:text-white smooth-transition"
+                >
+                  2401201064@krmu.edu.in
+                </a>
+              </div>
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-phone text-primary-400"></i>
+                <span>+91 12345 67890</span>
+              </div>
+              <div class="pt-4">
+                <div class="flex space-x-4">
+                  <a
+                    href="#"
+                    class="w-8 h-8 rounded-full bg-slate-800 hover:bg-primary-600 smooth-transition flex items-center justify-center"
+                  >
+                    <i class="fa-brands fa-twitter"></i>
+                  </a>
+                  <a
+                    href="#"
+                    class="w-8 h-8 rounded-full bg-slate-800 hover:bg-primary-600 smooth-transition flex items-center justify-center"
+                  >
+                    <i class="fa-brands fa-linkedin"></i>
+                  </a>
+                  <a
+                    href="#"
+                    class="w-8 h-8 rounded-full bg-slate-800 hover:bg-primary-600 smooth-transition flex items-center justify-center"
+                  >
+                    <i class="fa-brands fa-github"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="border-t border-slate-800 mt-8 pt-8 text-center">
+          <p class="text-sm opacity-75">
+            © 2026 SparkAI • AI-Powered Student Intelligence Platform • KRMU
+            Minor Project
+          </p>
+          <p class="text-xs opacity-50 mt-2">
+            Built with ❤️ for better education outcomes | Final Year Engineering
+            Project
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+      // Initialize AOS (Animate on Scroll)
+      AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100,
+      });
+
+      // Mobile menu toggle
+      document
+        .getElementById("mobile-menu-button")
+        .addEventListener("click", function () {
+          const menu = document.getElementById("mobile-menu");
+          menu.classList.toggle("hidden");
+        });
+
+      // AI Prediction Simulation - Updated to include internal_score and end-term
+      const predictions = [
+        {
+          text: "High Risk",
+          badge: "Urgent",
+          badgeClass: "bg-red-100 text-red-800",
+          desc: "Immediate intervention needed. Attendance below 60% and internal score (12/30) is low.",
+          progress: 30,
+          percentage: "30%",
+          endterm: 18,
+        },
+        {
+          text: "Medium Risk",
+          badge: "Monitor",
+          badgeClass: "bg-amber-100 text-amber-800",
+          desc: "Student shows potential with internal score 21/30 but needs consistency improvement.",
+          progress: 65,
+          percentage: "65%",
+          endterm: 28,
+        },
+        {
+          text: "Low Risk",
+          badge: "Good",
+          badgeClass: "bg-green-100 text-green-800",
+          desc: "Good performance with internal score 27/30. Maintain current study patterns.",
+          progress: 85,
+          percentage: "85%",
+          endterm: 35,
+        },
+        {
+          text: "Excellent",
+          badge: "Top",
+          badgeClass: "bg-blue-100 text-blue-800",
+          desc: "Outstanding performance with internal score 30/30. Consider advanced coursework.",
+          progress: 95,
+          percentage: "95%",
+          endterm: 39,
+        },
+      ];
+
+      let currentPrediction = 1;
+
+      function cyclePrediction() {
+        const prediction = predictions[currentPrediction];
+        const card = document.getElementById("ai-prediction");
+
+        // Add transition effects
+        card.classList.add("opacity-0");
+
+        setTimeout(() => {
+          document.getElementById("prediction-text").textContent =
+            prediction.text;
+          document.getElementById("prediction-badge").textContent =
+            prediction.badge;
+          document.getElementById("prediction-badge").className =
+            `px-2 py-1 rounded-full text-xs font-medium ${prediction.badgeClass}`;
+          document.getElementById("prediction-desc").textContent =
+            prediction.desc;
+          document.getElementById("progress-bar").style.width =
+            `${prediction.progress}%`;
+          document.getElementById("progress-percentage").textContent =
+            prediction.percentage;
+
+          // Update end-term prediction
+          const endtermSpan = document.querySelector(".mt-3.pt-3 .font-bold");
+          if (endtermSpan) {
+            endtermSpan.textContent = `${prediction.endterm}/40`;
+          }
+
+          card.classList.remove("opacity-0");
+        }, 300);
+
+        currentPrediction = (currentPrediction + 1) % predictions.length;
+      }
+
+      // Auto-cycle predictions every 5 seconds
+      setInterval(cyclePrediction, 5000);
+
+      // Create background particles
+      function createParticles() {
+        const container = document.getElementById("particles");
+        const particleCount = 20;
+
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "particle";
+
+          // Random properties
+          const size = Math.random() * 60 + 10;
+          const posX = Math.random() * 100;
+          const posY = Math.random() * 100;
+          const delay = Math.random() * 15;
+          const duration = Math.random() * 10 + 10;
+
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.left = `${posX}%`;
+          particle.style.top = `${posY}%`;
+          particle.style.opacity = Math.random() * 0.3 + 0.1;
+          particle.style.animationDelay = `${delay}s`;
+          particle.style.animationDuration = `${duration}s`;
+
+          container.appendChild(particle);
+        }
+      }
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          if (this.getAttribute("href") === "#") return;
+
+          e.preventDefault();
+          const targetId = this.getAttribute("href");
+          if (targetId === "#") return;
+
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 80,
+              behavior: "smooth",
+            });
+
+            // Close mobile menu if open
+            document.getElementById("mobile-menu").classList.add("hidden");
+          }
+        });
+      });
+
+      // Counter animation for stats
+      function initCounters() {
+        // Simple static display for now - could use CountUp.js for animation
+        console.log("Stats loaded");
+      }
+
+      // Initialize on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        createParticles();
+        initCounters();
+
+        // Add scroll-based animations
+        window.addEventListener("scroll", function () {
+          const header = document.querySelector("header");
+          if (window.scrollY > 100) {
+            header.classList.add("shadow-md");
+          } else {
+            header.classList.remove("shadow-md");
+          }
+        });
+      });
+
+      // Demo alert for schedule demo
+      document.querySelectorAll('a[href="#demo"]').forEach((link) => {
+        link.addEventListener("click", function (e) {
+          if (this.getAttribute("href") === "#demo") {
+            e.preventDefault();
+            alert(
+              "Demo scheduling feature coming soon! For now, please contact us at 2401201064@krmu.edu.in to schedule a demo.",
+            );
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

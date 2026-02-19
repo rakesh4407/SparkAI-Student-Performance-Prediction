@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error {{ error_code }} - SparkAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen flex items-center justify-center">
+    <div class="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center">
+      <div class="mb-6">
+        <div class="text-6xl font-bold text-red-500 mb-4">{{ error_code }}</div>
+        <h1 class="text-2xl font-semibold text-gray-800 mb-4">
+          {% if error_code == 404 %} Page Not Found {% elif error_code == 500 %}
+          Server Error {% elif error_code == 403 %} Access Denied {% elif
+          error_code == 400 %} Bad Request {% else %} Error {% endif %}
+        </h1>
+        <p class="text-gray-600 mb-8">{{ error_message }}</p>
+      </div>
+
+      <div class="space-y-4">
+        <a
+          href="{{ url_for('home') }}"
+          class="block w-full py-3 px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+        >
+          Go to Homepage
+        </a>
+        <button
+          onclick="history.back()"
+          class="block w-full py-3 px-4 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+        >
+          Go Back
+        </button>
+      </div>
+
+      {% if error_code == 500 %}
+      <div class="mt-8 p-4 bg-red-50 rounded-lg">
+        <p class="text-sm text-red-700">
+          Please try again later or contact support if the problem persists.
+        </p>
+      </div>
+      {% endif %}
+    </div>
+  </body>
+</html>

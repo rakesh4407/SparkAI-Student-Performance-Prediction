@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SparkAI • Student Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#2563eb",
+              secondary: "#8b5cf6",
+              success: "#10b981",
+              warning: "#f59e0b",
+              danger: "#ef4444",
+              info: "#3b82f6",
+              dark: "#1e293b",
+              light: "#f8fafc",
+            },
+            animation: {
+              "fade-in": "fadeIn 0.5s ease-in",
+              "slide-up": "slideUp 0.3s ease-out",
+              "pulse-glow": "pulseGlow 2s infinite",
+              float: "float 3s ease-in-out infinite",
+            },
+            keyframes: {
+              fadeIn: {
+                "0%": { opacity: "0", transform: "translateY(10px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+              slideUp: {
+                "0%": { transform: "translateY(20px)", opacity: "0" },
+                "100%": { transform: "translateY(0)", opacity: "1" },
+              },
+              pulseGlow: {
+                "0%, 100%": { boxShadow: "0 0 5px currentColor" },
+                "50%": { boxShadow: "0 0 15px currentColor" },
+              },
+              float: {
+                "0%, 100%": { transform: "translateY(0px)" },
+                "50%": { transform: "translateY(-10px)" },
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .stat-card {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s;
+      }
+      .stat-card:hover::before {
+        left: 100%;
+      }
+      .progress-ring {
+        transform: rotate(-90deg);
+      }
+      .circular-progress {
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1s ease-in-out;
+      }
+      .risk-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .score-badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-gradient-to-br from-sky-50 via-white to-indigo-50 text-slate-800 min-h-screen"
+  >
+    <!-- ================= ENHANCED TOP NAV ================= -->
+    <header
+      class="sticky top-0 z-50 bg-white/95 backdrop-blur-lg border-b border-slate-200 shadow-sm"
+    >
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex justify-between items-center">
+          <!-- Logo & Brand -->
+          <div class="flex items-center gap-3">
+            <div class="relative group">
+              <div
+                class="w-12 h-12 rounded-2xl bg-gradient-to-r from-primary to-secondary flex items-center justify-center shadow-lg"
+              >
+                <i class="fas fa-graduation-cap text-white text-xl"></i>
+                <div
+                  class="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-50 transition-opacity duration-300"
+                ></div>
+              </div>
+              <div
+                class="absolute -bottom-2 -right-2 w-5 h-5 bg-success rounded-full border-2 border-white animate-pulse-glow"
+              ></div>
+            </div>
+
+            <div>
+              <h1
+                class="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+              >
+                SparkAI
+              </h1>
+              <p class="text-xs text-slate-500">Student Performance System</p>
+            </div>
+          </div>
+
+          <!-- User Info & Navigation -->
+          <div class="flex items-center gap-6">
+            <div class="hidden md:flex items-center gap-6">
+              <div class="relative group cursor-pointer">
+                <div
+                  class="flex items-center gap-3 px-4 py-2 rounded-xl hover:bg-slate-50 transition"
+                >
+                  <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center"
+                  >
+                    <span class="text-white text-sm font-bold"
+                      >{{ username[0]|upper if username else 'S' }}</span
+                    >
+                  </div>
+                  <div class="text-left">
+                    <p class="font-semibold text-sm">{{ name }}</p>
+                    <p class="text-xs text-slate-500">Roll No: {{ roll_no }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <nav class="flex items-center gap-2">
+              <a
+                href="/student-dashboard"
+                class="px-4 py-2 rounded-xl bg-primary text-white font-medium text-sm hover:shadow-lg transition-all duration-300 flex items-center gap-2"
+              >
+                <i class="fas fa-tachometer-alt"></i>
+                <span class="hidden sm:inline">Dashboard</span>
+              </a>
+              <a
+                href="/student-history"
+                class="px-4 py-2 rounded-xl text-slate-700 hover:text-primary hover:bg-slate-50 font-medium text-sm transition-all duration-300 flex items-center gap-2"
+              >
+                <i class="fas fa-history"></i>
+                <span class="hidden sm:inline">History</span>
+              </a>
+              <a
+                href="/chatbot"
+                class="px-4 py-2 rounded-xl text-slate-700 hover:text-primary hover:bg-slate-50 font-medium text-sm transition-all duration-300 flex items-center gap-2 relative"
+              >
+                <i class="fas fa-robot"></i>
+                <span class="hidden sm:inline">AI Help</span>
+                <span
+                  class="absolute -top-1 -right-1 w-2 h-2 bg-success rounded-full animate-pulse"
+                ></span>
+              </a>
+              <a
+                href="/logout"
+                class="px-4 py-2 rounded-xl text-danger hover:bg-red-50 font-medium text-sm transition-all duration-300 flex items-center gap-2"
+              >
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="hidden sm:inline">Logout</span>
+              </a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="max-w-7xl mx-auto px-6 py-8">
+      <!-- WELCOME SECTION -->
+      <section class="mb-10 animate-fade-in">
+        <div
+          class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+        >
+          <div>
+            <h2 class="text-4xl font-bold mb-2">
+              Welcome back,
+              <span
+                class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+                >{{ name }}</span
+              >
+              👋
+            </h2>
+            <p class="text-slate-600">
+              Here's your personalized academic performance dashboard
+            </p>
+          </div>
+          <div
+            class="flex items-center gap-3 bg-white rounded-2xl px-5 py-3 shadow"
+          >
+            <div class="w-3 h-3 rounded-full bg-success animate-pulse"></div>
+            <span class="text-sm font-medium">Last updated: Just now</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- KEY METRICS GRID - Updated for new scoring system -->
+      <section
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"
+      >
+        <!-- Attendance Card -->
+        <div
+          class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border-l-4 border-primary"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-slate-500 text-sm font-medium mb-1">Attendance</p>
+              <h3 class="text-3xl font-bold">
+                {{ attendance }}<span class="text-lg">%</span>
+              </h3>
+            </div>
+            <div
+              class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"
+            >
+              <i class="fas fa-calendar-check text-primary text-xl"></i>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2">
+            <div
+              class="h-2 rounded-full bg-primary"
+              style="width: {{ attendance }}%"
+            ></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            {% if attendance >= 85 %}Excellent attendance! Keep it up!{% elif
+            attendance >= 75 %}Good attendance{% else %}Needs improvement{%
+            endif %}
+          </p>
+        </div>
+
+        <!-- Input Total Card (60 marks) -->
+        <div
+          class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border-l-4 border-purple-500"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-slate-500 text-sm font-medium mb-1">Input Total</p>
+              <h3 class="text-3xl font-bold">
+                {{ input_total }}<span class="text-lg">/60</span>
+              </h3>
+            </div>
+            <div
+              class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center"
+            >
+              <i class="fas fa-pen-to-square text-purple-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2">
+            <div
+              class="h-2 rounded-full bg-purple-500"
+              style="width: {{ (input_total/60*100)|round }}%"
+            ></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            Assignments + Midterm + Internal Score combined score
+          </p>
+        </div>
+
+        <!-- End-term Score Card (40 marks) -->
+        <div
+          class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border-l-4 border-blue-500"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-slate-500 text-sm font-medium mb-1">End-term</p>
+              <h3 class="text-3xl font-bold">
+                {{ final }}<span class="text-lg">/40</span>
+              </h3>
+            </div>
+            <div
+              class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center"
+            >
+              <i class="fas fa-graduation-cap text-blue-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2">
+            <div
+              class="h-2 rounded-full bg-blue-500"
+              style="width: {{ (final/40*100)|round }}%"
+            ></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            {% if final >= 32 %}Excellent end-term performance!{% elif final >=
+            28 %}Good end-term score{% else %}Focus on improving end-term{%
+            endif %}
+          </p>
+        </div>
+
+        <!-- Total Score Card (100 marks) -->
+        <div
+          class="stat-card bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl border-l-4 {% if total_score >= 80 %}border-success {% elif total_score >= 70 %}border-info {% elif total_score >= 60 %}border-warning {% else %}border-danger{% endif %}"
+        >
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <p class="text-slate-500 text-sm font-medium mb-1">Total Score</p>
+              <h3 class="text-3xl font-bold">
+                {{ total_score }}<span class="text-lg">/100</span>
+              </h3>
+            </div>
+            <div
+              class="w-12 h-12 rounded-xl {% if total_score >= 80 %}bg-green-50 {% elif total_score >= 70 %}bg-blue-50 {% elif total_score >= 60 %}bg-yellow-50 {% else %}bg-red-50{% endif %} flex items-center justify-center"
+            >
+              <i
+                class="fas fa-star {% if total_score >= 80 %}text-success {% elif total_score >= 70 %}text-info {% elif total_score >= 60 %}text-warning {% else %}text-danger{% endif %} text-xl"
+              ></i>
+            </div>
+          </div>
+          <div class="w-full bg-slate-200 rounded-full h-2">
+            <div
+              class="h-2 rounded-full {% if total_score >= 80 %}bg-success {% elif total_score >= 70 %}bg-info {% elif total_score >= 60 %}bg-warning {% else %}bg-danger{% endif %}"
+              style="width: {{ total_score }}%"
+            ></div>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            {% if total_score >= 80 %}Excellent overall! Top performance{% elif
+            total_score >= 70 %}Good progress! Keep it up{% elif total_score >=
+            60 %}Average performance{% else %}Needs improvement{% endif %}
+          </p>
+        </div>
+      </section>
+
+      <!-- PERFORMANCE DETAILS SECTION - Updated with internal score -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <!-- Academic Score Breakdown -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 animate-slide-up">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg">Academic Score Breakdown</h3>
+            <span
+              class="text-xs font-medium px-3 py-1 rounded-full bg-blue-100 text-primary"
+              >Total: 100 marks</span
+            >
+          </div>
+
+          <div class="space-y-5">
+            <!-- Assignments -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center"
+                >
+                  <i class="fas fa-file-alt text-success"></i>
+                </div>
+                <div>
+                  <p class="font-medium">Assignments</p>
+                  <p class="text-xs text-slate-500">10 marks</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-32 bg-slate-200 rounded-full h-2">
+                  <div
+                    class="h-2 rounded-full bg-success"
+                    style="width: {{ (assignments/10*100)|round }}%"
+                  ></div>
+                </div>
+                <span class="font-bold text-success"
+                  >{{ assignments|round(1) }}/10</span
+                >
+              </div>
+            </div>
+
+            <!-- Midterm -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center"
+                >
+                  <i class="fas fa-pencil-alt text-warning"></i>
+                </div>
+                <div>
+                  <p class="font-medium">Midterm</p>
+                  <p class="text-xs text-slate-500">20 marks</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-32 bg-slate-200 rounded-full h-2">
+                  <div
+                    class="h-2 rounded-full bg-warning"
+                    style="width: {{ (midterm/20*100)|round }}%"
+                  ></div>
+                </div>
+                <span class="font-bold text-warning"
+                  >{{ midterm|round(1) }}/20</span
+                >
+              </div>
+            </div>
+
+            <!-- Internal Score (NEW) -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center"
+                >
+                  <i class="fas fa-flask text-purple-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium">Internal Score</p>
+                  <p class="text-xs text-slate-500">30 marks</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-32 bg-slate-200 rounded-full h-2">
+                  <div
+                    class="h-2 rounded-full bg-purple-500"
+                    style="width: {{ (internal_score/30*100)|round }}%"
+                  ></div>
+                </div>
+                <span class="font-bold text-purple-600"
+                  >{{ internal_score|round(1) }}/30</span
+                >
+              </div>
+            </div>
+
+            <!-- End-term -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center"
+                >
+                  <i class="fas fa-graduation-cap text-blue-600"></i>
+                </div>
+                <div>
+                  <p class="font-medium">End-term</p>
+                  <p class="text-xs text-slate-500">40 marks</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="w-32 bg-slate-200 rounded-full h-2">
+                  <div
+                    class="h-2 rounded-full bg-blue-500"
+                    style="width: {{ (final/40*100)|round }}%"
+                  ></div>
+                </div>
+                <span class="font-bold text-blue-600"
+                  >{{ final|round(1) }}/40</span
+                >
+              </div>
+            </div>
+
+            <!-- Total Line -->
+            <div class="pt-4 mt-2 border-t border-slate-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center"
+                  >
+                    <i class="fas fa-star text-amber-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">Total Score</p>
+                    <p class="text-xs text-slate-500">100 marks</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span
+                    class="font-bold text-lg {% if total_score >= 80 %}text-success{% elif total_score >= 70 %}text-info{% elif total_score >= 60 %}text-warning{% else %}text-danger{% endif %}"
+                    >{{ total_score }}/100</span
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Performance Insights - Updated -->
+        <div
+          class="bg-gradient-to-br from-primary to-secondary rounded-2xl shadow-lg p-6 text-white animate-slide-up"
+          style="animation-delay: 0.1s"
+        >
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg">AI Performance Insights</h3>
+            <div
+              class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"
+            >
+              <i class="fas fa-brain"></i>
+            </div>
+          </div>
+
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm opacity-90">Performance Category</span>
+              <span class="font-bold text-xl">{{ performance }}</span>
+            </div>
+            <div class="w-full bg-white/20 rounded-full h-2">
+              <div
+                class="h-2 rounded-full bg-white"
+                style="width: 
+                {% if performance == 'Excellent' %}95%
+                {% elif performance == 'Good' %}80%
+                {% elif performance == 'Average' %}65%
+                {% else %}45%{% endif %}"
+              ></div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <p class="text-xs opacity-75 mb-1">Risk Level</p>
+              <p class="font-semibold">
+                {% if risk_level == 'Low' %}
+                <span class="text-green-300">Low Risk ✓</span>
+                {% elif risk_level == 'Medium' %}
+                <span class="text-yellow-300">Medium Risk ⚠</span>
+                {% else %}
+                <span class="text-red-300">High Risk !</span>
+                {% endif %}
+              </p>
+            </div>
+            <div class="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <p class="text-xs opacity-75 mb-1">Study Hours</p>
+              <p class="font-semibold">{{ study_hours }} hrs/day</p>
+            </div>
+          </div>
+
+          <div class="mt-6 text-sm opacity-90">
+            <p>
+              <i class="fas fa-lightbulb mr-2"></i> Based on your academic
+              scores (Assignments: {{ assignments }}/10, Midterm: {{ midterm
+              }}/20, Internal Score: {{ internal_score }}/30)
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PERSONALIZED RECOMMENDATIONS -->
+      <section class="mb-10 animate-fade-in" style="animation-delay: 0.2s">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg text-white">
+                Personalized AI Recommendations
+              </h3>
+              <div class="flex items-center gap-2">
+                <i class="fas fa-robot text-white"></i>
+                <span class="text-sm text-white/90"
+                  >Generated just for you</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <div class="flex items-start gap-4">
+              <div
+                class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0"
+              >
+                <i class="fas fa-lightbulb text-primary text-xl"></i>
+              </div>
+              <div>
+                <p class="text-slate-700 leading-relaxed mb-4">
+                  {{ recommendation }}
+                </p>
+
+                <!-- Action Steps -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                  <div
+                    class="border border-slate-200 rounded-xl p-4 hover:border-primary transition-colors"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mb-3"
+                    >
+                      <i class="fas fa-calendar-plus text-primary"></i>
+                    </div>
+                    <p class="font-medium mb-2">Improve Attendance</p>
+                    <p class="text-sm text-slate-600">
+                      Aim for 75%+ attendance rate
+                    </p>
+                  </div>
+
+                  <div
+                    class="border border-slate-200 rounded-xl p-4 hover:border-primary transition-colors"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center mb-3"
+                    >
+                      <i class="fas fa-book text-success"></i>
+                    </div>
+                    <p class="font-medium mb-2">Focus on Internal Score</p>
+                    <p class="text-sm text-slate-600">
+                      Internal score is 30% of total
+                    </p>
+                  </div>
+
+                  <div
+                    class="border border-slate-200 rounded-xl p-4 hover:border-primary transition-colors"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center mb-3"
+                    >
+                      <i class="fas fa-chart-line text-secondary"></i>
+                    </div>
+                    <p class="font-medium mb-2">End-term Prep</p>
+                    <p class="text-sm text-slate-600">
+                      End-term is 40% of total score
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ACTION BUTTONS -->
+      <section
+        class="flex flex-wrap gap-4 animate-fade-in"
+        style="animation-delay: 0.3s"
+      >
+        <a
+          href="/student-report/{{ roll_no }}"
+          class="px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-blue-600 text-white font-medium hover:shadow-xl transition-all duration-300 flex items-center gap-3 group"
+        >
+          <i class="fas fa-download"></i>
+          <span>Download AI Report</span>
+          <i
+            class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"
+          ></i>
+        </a>
+
+        <a
+          href="/predict"
+          class="px-8 py-4 rounded-xl bg-gradient-to-r from-secondary to-purple-600 text-white font-medium hover:shadow-xl transition-all duration-300 flex items-center gap-3 group"
+        >
+          <i class="fas fa-chart-line"></i>
+          <span>New Performance Prediction</span>
+          <i
+            class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"
+          ></i>
+        </a>
+
+        <a
+          href="/chatbot"
+          class="px-8 py-4 rounded-xl bg-gradient-to-r from-success to-green-500 text-white font-medium hover:shadow-xl transition-all duration-300 flex items-center gap-3 group"
+        >
+          <i class="fas fa-robot"></i>
+          <span>Talk to AI Assistant</span>
+          <i
+            class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"
+          ></i>
+        </a>
+      </section>
+
+      <!-- RECENT PREDICTIONS HISTORY -->
+      {% if history and history|length > 0 %}
+      <section class="mt-10 animate-fade-in">
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+          <h3 class="font-bold text-lg mb-4">Recent Predictions</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="bg-slate-50">
+                <tr>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase"
+                  >
+                    Date
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase"
+                  >
+                    End-term
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase"
+                  >
+                    Total
+                  </th>
+                  <th
+                    class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase"
+                  >
+                    Category
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                {% for h in history %}
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-2 text-sm">
+                    {{ h.date.split(' ')[0] if h.date else '-' }}
+                  </td>
+                  <td class="px-4 py-2 text-sm font-medium text-blue-600">
+                    {{ h.predicted_endterm }}/40
+                  </td>
+                  <td
+                    class="px-4 py-2 text-sm font-bold {% if h.total_score >= 80 %}text-success{% elif h.total_score >= 70 %}text-info{% elif h.total_score >= 60 %}text-warning{% else %}text-danger{% endif %}"
+                  >
+                    {{ h.total_score }}/100
+                  </td>
+                  <td class="px-4 py-2">
+                    <span
+                      class="px-2 py-1 rounded-full text-xs font-semibold {% if h.category == 'Excellent' %}bg-green-100 text-green-800 {% elif h.category == 'Good' %}bg-blue-100 text-blue-800 {% elif h.category == 'Average' %}bg-yellow-100 text-yellow-800 {% else %}bg-red-100 text-red-800{% endif %}"
+                    >
+                      {{ h.category }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-4 text-right">
+            <a
+              href="/student-history"
+              class="text-primary hover:text-blue-700 text-sm font-medium"
+            >
+              View All History <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- QUICK STATS FOOTER -->
+      <div class="mt-12 pt-8 border-t border-slate-200">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div>
+            <p class="text-xs text-slate-500 mb-1">Account Status</p>
+            <div class="inline-flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+              <p class="font-bold">Active</p>
+            </div>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 mb-1">Total Score</p>
+            <p
+              class="font-bold {% if total_score >= 80 %}text-success{% elif total_score >= 70 %}text-info{% elif total_score >= 60 %}text-warning{% else %}text-danger{% endif %}"
+            >
+              {{ total_score }}/100
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 mb-1">Last Login</p>
+            <p class="font-bold">Today</p>
+          </div>
+          <div>
+            <p class="text-xs text-slate-500 mb-1">System Health</p>
+            <div class="inline-flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+              <p class="font-bold">Optimal</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 text-center text-sm text-slate-500">
+      <p>SparkAI Student Performance System • Powered by Machine Learning</p>
+      <p class="mt-2">
+        Total Score = Assignments(10) + Midterm(20) + Internal Score(30) + End-term(40) =
+        100 marks
+      </p>
+    </footer>
+
+    <script>
+      // Add interactive animations
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add hover effect to all stat cards
+        const cards = document.querySelectorAll(".stat-card");
+        cards.forEach((card) => {
+          card.addEventListener("mouseenter", () => {
+            card.style.boxShadow = "0 20px 40px rgba(0,0,0,0.1)";
+          });
+          card.addEventListener("mouseleave", () => {
+            card.style.boxShadow = "0 10px 25px rgba(0,0,0,0.05)";
+          });
+        });
+
+        // Update performance ring animation
+        const performanceValue = "{{ performance }}";
+        const ring = document.querySelector(".circular-progress");
+        if (ring) {
+          const circumference = 2 * Math.PI * 40;
+          const offset =
+            circumference *
+            (1 -
+              (performanceValue === "Excellent"
+                ? 0.95
+                : performanceValue === "Good"
+                  ? 0.8
+                  : performanceValue === "Average"
+                    ? 0.65
+                    : 0.45));
+
+          ring.style.strokeDasharray = `${circumference} ${circumference}`;
+          ring.style.strokeDashoffset = offset;
+        }
+      });
+    </script>
+  </body>
+</html>
