@@ -25,8 +25,6 @@ This project is developed as a **Final Year Engineering Project** and follows bo
   <img src="screenshots/prediction-form.png" alt="Prediction Form" width="800"/>
   <p><em>AI Performance Prediction Form</em></p>
   
-  <img src="screenshots/chatbot.png" alt="AI Chatbot" width="800"/>
-  <p><em>AI Academic Assistant Chatbot</em></p>
 </div>
 
 ---
