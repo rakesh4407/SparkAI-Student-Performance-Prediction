@@ -5,7 +5,7 @@
 ![ML](https://img.shields.io/badge/ML-RandomForest-orange.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
-![Status](https://img.shields.io/badge/Status-Completed-success.svg)
+![Status](https://img.shields.io/badge/Status-Completed-success.svg).
 
 SparkAI is a full-stack AI-powered web application designed to predict student academic performance and provide personalized recommendations. The system leverages Machine Learning techniques to identify at-risk students and assist teachers, students, and administrators with data-driven insights.
 
